@@ -1,0 +1,20 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+flask = "==2.2.2"
+flask-sqlalchemy = "==3.0.3"
+flask-jwt-extended = "==4.4.4"
+psycopg2-binary = "==2.9.5"
+python-dotenv = "==0.21.0"
+cloudinary = "==1.30.0"
+sendgrid = "==6.9.7"
+pytest = "*"
+pytest-flask = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.12"
