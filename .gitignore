@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+
+# Pipenv
+Pipfile.lock
+
+# Virtualenv
+.venv/
+venv/
+ENV/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+
+# Migrations cache
+backend/migrations/__pycache__/
+
+# Database
+*.sqlite3
+*.db
+
+# Test output
+htmlcov/
+.coverage
+
+# Logs
+*.log
+
+# Jupyter
+.ipynb_checkpoints/
