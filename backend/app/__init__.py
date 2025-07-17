@@ -1,6 +1,1 @@
-from flask import Flask
-
-def create_app():
-    app = Flask(__name__)
-    app.config.from_object('app.config.Config')
-    return app
+from .models import init_app_models
