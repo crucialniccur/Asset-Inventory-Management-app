@@ -11,4 +11,9 @@ def create_app():
 
     from flask_migrate import Migrate
     Migrate(app, db)
+
+    # Register blueprints
+    from app.routes.auth import auth_bp
+    app.register_blueprint(auth_bp)
+
     return app
