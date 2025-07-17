@@ -14,6 +14,14 @@ def create_app():
     # Import all models so Alembic sees them for migrations
     from .models import user, asset, asset_allocation, request
 
+    # Register JWT
+    from flask_jwt_extended import JWTManager
+    jwt = JWTManager(app)
+
+    # Register blueprints
+    from .routes.auth import auth_bp
+    app.register_blueprint(auth_bp, url_prefix='/auth')
+
     return app
 
 class Config:

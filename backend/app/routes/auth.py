@@ -1,10 +1,9 @@
 from flask import Blueprint, request, jsonify
-from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from app.models.user import db, User
 
 auth_bp = Blueprint('auth', __name__)
 
-# Register route
 @auth_bp.route('/register', methods=['POST'])
 def register():
     data = request.get_json()
@@ -25,7 +24,6 @@ def register():
     db.session.commit()
     return jsonify({'message': 'User registered successfully'}), 201
 
-# Login route
 @auth_bp.route('/login', methods=['POST'])
 def login():
     data = request.get_json()
@@ -39,12 +37,13 @@ def login():
     access_token = create_access_token(identity={'id': user.id, 'role': user.role, 'email': user.email})
     return jsonify({'access_token': access_token}), 200
 
-# Protected route example
 @auth_bp.route('/me', methods=['GET'])
 @jwt_required()
 def me():
     identity = get_jwt_identity()
     user = User.query.get(identity['id'])
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
     return jsonify({
         'id': user.id,
         'full_name': user.full_name,
