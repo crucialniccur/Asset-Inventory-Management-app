@@ -3,7 +3,7 @@ from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identi
 from app.models.user import db, User, UserRole
 from app.utils.decorators import role_required
 
-auth_bp = Blueprint('auth', __name__)
+auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
 
 @auth_bp.route('/register', methods=['POST'])
 @jwt_required()
@@ -54,12 +54,6 @@ def me():
         'role': user.role.value,
         'created_at': user.created_at.isoformat()
     })
-
-# app/routes/auth.py
-
-from flask import Blueprint, jsonify
-
-auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
 
 @auth_bp.route('/ping', methods=['GET'])
 def ping():
