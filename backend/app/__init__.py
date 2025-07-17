@@ -6,6 +6,9 @@ def create_app():
     app.config.from_object('app.config.Config')
     db.init_app(app)
 
+    from app.extensions import jwt
+    jwt.init_app(app)
+
     # Import models so Alembic sees them
     from app.models import user
 
