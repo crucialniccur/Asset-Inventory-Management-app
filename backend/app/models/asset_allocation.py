@@ -1,6 +1,4 @@
-from flask_sqlalchemy import SQLAlchemy
-
-db = SQLAlchemy()
+from .user import db
 
 class AssetAllocation(db.Model):
     __tablename__ = 'asset_allocations'

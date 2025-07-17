@@ -1,6 +1,4 @@
-from flask_sqlalchemy import SQLAlchemy
-
-db = SQLAlchemy()
+from .user import db
 
 class Request(db.Model):
     __tablename__ = 'requests'

@@ -8,7 +8,7 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     full_name = db.Column(db.String(100))
     email = db.Column(db.String(120), unique=True)
-    password_hash = db.Column(db.String(128))
+    password_hash = db.Column(db.String(256))  # Increased length for hashes
     role = db.Column(db.String(50))  # admin, procurement, finance, employee
 
     def set_password(self, password):
