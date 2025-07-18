@@ -1,5 +1,5 @@
 def test_create_request(client, auth, db):
-    auth.login()  # Simulate a logged-in user
+    auth.login()
 
     response = client.post("/requests", json={
         "asset_type": "Laptop",
@@ -18,7 +18,6 @@ def test_create_request(client, auth, db):
 def test_request_validation(client, auth):
     auth.login()
 
-    # Missing quantity
     response = client.post("/requests", json={
         "asset_type": "Chair",
         "urgency": "Medium",
