@@ -89,3 +89,39 @@ def test_get_user_requests(client, auth, db_session):
     assert len(requests) == 2
     for r in requests:
         assert r["user_id"] == user.id
+
+
+""" approving a request """
+def test_admin_can_approve_request(client, auth, db_session):
+    user = auth.login()
+    
+    response = client.post("/requests", json={
+        "asset_name": "Printer",
+        "type": "New Asset",
+        "reason": "Shared office needs",
+        "urgency": "medium"
+    })
+    request_id = response.get_json()["id"]
+
+    response = client.patch(f"/requests/{request_id}", json={"status": "approved"})
+    assert response.status_code == 200
+
+    updated = response.get_json()
+    assert updated["status"] == "approved"
+
+
+""" invalid status update """
+def test_invalid_status_update(client, auth):
+    user = auth.login()
+
+    response = client.post("/requests", json={
+        "asset_name": "Router",
+        "type": "New Asset",
+        "reason": "Network upgrade",
+        "urgency": "high"
+    })
+    request_id = response.get_json()["id"]
+
+    response = client.patch(f"/requests/{request_id}", json={"status": "not-a-status"})
+    assert response.status_code == 400
+    assert "status" in response.get_json()["errors"]
