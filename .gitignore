@@ -39,7 +39,10 @@ htmlcov/
 # Jupyter
 .ipynb_checkpoints/
 
+
 # Env files
 .env
 .env.*
 backend/.env
+
+node_modules
