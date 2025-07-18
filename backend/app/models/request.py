@@ -18,6 +18,7 @@ class RequestStatus(Enum):
     REJECTED = "rejected"
     FULFILLED = "fulfilled"
 
+
 class Request(db.Model):
     __tablename__ = 'requests'
 
