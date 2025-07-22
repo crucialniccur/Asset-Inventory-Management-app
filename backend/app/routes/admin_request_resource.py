@@ -1,9 +1,7 @@
 from models.request import RequestStatus
 from flask_restful import Resource
-from models import Request
+from models import Request, db
 from decorators import role_required
-
-from models import db
 
 class AllRequests(Resource):
     @role_required("Admin", "Procurement", "Finance")
