@@ -4,7 +4,6 @@ from datetime import datetime
 from sqlalchemy import Enum as PgEnum
 import enum
 
-# Shared db instance
 from app.models import db
 
 class UserRole(enum.Enum):
@@ -22,15 +21,17 @@ class User(db.Model):
     role = db.Column(PgEnum(UserRole, name="user_role_enum"), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-    # Relationships (to be completed by Samuel)
-    # requests = db.relationship('Request', backref='user', lazy=True)
-    # allocations = db.relationship('Allocation', backref='user', lazy=True)
+    requests = db.relationship('Request', back_populates='user', cascade="all, delete-orphan")
+    allocations = db.relationship('Allocation', back_populates='user', cascade="all, delete-orphan")
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
+    
+    def has_role(self, *roles):
+        return self.role.name in roles
 
     def __repr__(self):
         return f'<User {self.name}>'
