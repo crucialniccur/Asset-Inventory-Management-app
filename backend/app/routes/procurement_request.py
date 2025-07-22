@@ -1,28 +1,43 @@
-from models import Request, db
+from flask import Blueprint, jsonify
+from models.request import Request
 from utils.decorators import role_required
-from flask_restful import Resource
 from models.request import RequestStatus
+from flask_jwt_extended import jwt_required
 
-class ApproveRequest(Resource):
-    @role_required("Procurement")
-    def patch(self, request_id):
-        request = Request.query.get_or_404(request_id)
-        request.status = RequestStatus.APPROVED
-        db.session.commit()
-        return {"message": "Request approved"}, 200
+from models import db
+
+procurement_bp = Blueprint('procurement', __name__, url_prefix='/procurement')
+
+@procurement_bp.route('/requests', methods=['GET'])
+@jwt_required()
+@role_required("Procurement")
+def get_all_requests():
+    requests = Request.query.all()
+    return jsonify([r.to_dict() for r in requests]), 200
+
+@procurement_bp.route('/requests/<int:request_id>/approve', methods=['PATCH'])
+@jwt_required()
+@role_required("Procurement")
+def approve_request(request_id):
+    request = Request.query.get_or_404(request_id)
+    request.status = RequestStatus.APPROVED
+    db.session.commit()
+    return {"message": "Request approved"}, 200
     
-class RejectRequest(Resource):
-    @role_required("Procurement")
-    def patch(self, request_id):
-        request = Request.query.get_or_404(request_id)
-        request.status = RequestStatus.REJECTED
-        db.session.commit()
-        return {"message": "Request rejected"}, 200
+@procurement_bp.route('/requests/<int:request_id>/reject', methods=['PATCH'])
+@jwt_required()
+@role_required("Procurement")
+def reject_request(request_id):
+    request = Request.query.get_or_404(request_id)
+    request.status = RequestStatus.REJECTED
+    db.session.commit()
+    return {"message": "Request rejected"}, 200
     
-class FulfillRequest(Resource):
-    @role_required("Procurement")
-    def patch(self, request_id):
-        request = Request.query.get_or_404(request_id)
-        request.status = RequestStatus.FULFILLED
-        db.session.commit()
-        return {"message": "Request fulfilled"}, 200
+@procurement_bp.route('/requests/<int:request_id>/fulfill', methods=['PATCH'])
+@jwt_required()
+@role_required("Procurement")
+def fulfill_request(request_id):
+    request = Request.query.get_or_404(request_id)
+    request.status = RequestStatus.FULFILLED
+    db.session.commit()
+    return {"message": "Request fulfilled"}, 200
