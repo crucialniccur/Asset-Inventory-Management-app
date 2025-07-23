@@ -8,7 +8,7 @@ upload_bp = Blueprint('upload', __name__, url_prefix='/upload')
 
 @upload_bp.route('/image', methods=['POST'])
 @jwt_required()
-@role_required("Employee")  # or remove this to test freely
+# @role_required("Employee")  # or remove this to test freely
 def upload_image():
     if 'file' not in request.files:
         return jsonify({"error": "No file part in request"}), 400
