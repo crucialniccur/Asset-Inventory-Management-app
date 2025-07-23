@@ -47,6 +47,7 @@ def create_app():
     from app.routes.employee_request import employee_bp
     from app.routes.finance_request import finrequests_bp
     from app.routes.procurement_request import procurement_bp
+    from app.routes.upload import upload_bp
 
     app.register_blueprint(users_bp)
     app.register_blueprint(category_bp)
@@ -58,5 +59,6 @@ def create_app():
     app.register_blueprint(procurement_bp)
     app.register_blueprint(employee_bp)
     app.register_blueprint(asset_allocation_bp)
+    app.register_blueprint(upload_bp)
 
     return app
