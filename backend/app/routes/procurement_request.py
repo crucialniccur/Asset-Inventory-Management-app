@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify
-from models.request import Request, RequestStatus
-from utils.decorators import role_required
+from app.models.request import Request, RequestStatus
+from app.utils.decorators import role_required
 from flask_jwt_extended import jwt_required
 
 from models import db

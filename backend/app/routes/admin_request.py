@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify
-from models.request import Request, db
+from app.models.request import Request, db
 from decorators import role_required
 from flask_jwt_extended import jwt_required
 

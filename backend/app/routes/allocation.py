@@ -1,8 +1,8 @@
-from decorators import role_required
-from models import Allocation, db
+from app.utils.decorators import role_required
+from app.models.allocation import Allocation
 from flask import request
 from flask_jwt_extended import jwt_required
-
+from app.models import db
 from flask import Blueprint
 
 asset_allocation_bp = Blueprint('allocation', __name__, url_prefix='/procurement/requests/<int:request_id>')
