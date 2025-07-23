@@ -13,7 +13,7 @@ def role_required(*roles):
         def wrapper(*args, **kwargs):
             token = None
             if 'Authorization' in request.headers:
-                token = request.headers['Authorization'].split(" ")[1]
+                token = request.headers['Authorization']
             if not token:
                 return jsonify({"message": "Token is missing"}), 401
             
