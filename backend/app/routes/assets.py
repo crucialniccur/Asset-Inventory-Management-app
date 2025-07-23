@@ -1,43 +1,20 @@
-from flask import Blueprint
-
-asset_bp = Blueprint('assets', __name__)
-
-@asset_bp.route('/assets')
-def get_assets():
-    return {"message": "Assets route is working"}
-
-""" from flask_restful import Resource
-from flask import request
+from flask import Blueprint, request, jsonify
 from app.models.asset import Asset
-from app import db
+from app.models import db
 
-class AssetListResource(Resource):
-    def get(self):
-        # Return all assets
-        return [a.to_dict() for a in Asset.query.all()], 200
+asset_bp = Blueprint('assets', __name__, url_prefix='/assets')
 
-    def post(self):
-        data = request.get_json()
-        new_asset = Asset(**data)
-        db.session.add(new_asset)
-        db.session.commit()
-        return new_asset.to_dict(), 201
+@asset_bp.route('', methods=['GET'])
+def get_assets():
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 10, type=int)
 
+    pagination = Asset.query.paginate(page=page, per_page=per_page, error_out=False)
+    assets = [asset.to_dict() for asset in pagination.items]
 
-class AssetResource(Resource):
-    def get(self, asset_id):
-        asset = Asset.query.get_or_404(asset_id)
-        return asset.to_dict(), 200
-
-    def put(self, asset_id):
-        asset = Asset.query.get_or_404(asset_id)
-        data = request.get_json()
-        asset.name = data.get("name", asset.name)
-        db.session.commit()
-        return asset.to_dict(), 200
-
-    def delete(self, asset_id):
-        asset = Asset.query.get_or_404(asset_id)
-        db.session.delete(asset)
-        db.session.commit()
-        return {"message": "Deleted"}, 204 """
+    return jsonify({
+        "assets": assets,
+        "page": page,
+        "total_pages": pagination.pages,
+        "total_items": pagination.total
+    }), 200

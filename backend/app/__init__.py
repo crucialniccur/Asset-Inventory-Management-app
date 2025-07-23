@@ -1,5 +1,5 @@
 from flask import Flask
-from app.models import db
+from app.models import db, init_app_models
 
 def create_app():
     app = Flask(__name__)
@@ -7,25 +7,32 @@ def create_app():
     print(app.config)
     db.init_app(app)
 
+    # Initialize all models to avoid circular dependency issues
+    init_app_models()
+
     from app.extensions import jwt
     jwt.init_app(app)
-
-    # Import models so Alembic sees them
-    from app.models import user
 
     from flask_migrate import Migrate
     Migrate(app, db)
 
+    # Import models so Alembic detects them
+    from app.models import user, asset, category
+
     # Register blueprints
     from app.routes.auth import auth_bp
     from app.routes.home import home_bp
+    from app.routes.users import users_bp
+    from app.routes.assets import asset_bp
+    from app.routes.categories import category_bp   
     from app.routes.admin_request import requests_bp
     from app.routes.allocation import asset_allocation_bp
-    from app.routes.assets import asset_bp
     from app.routes.employee_request import employee_bp
     from app.routes.finance_request import finrequests_bp
     from app.routes.procurement_request import procurement_bp
-
+    
+    app.register_blueprint(users_bp)
+    app.register_blueprint(category_bp)
     app.register_blueprint(auth_bp)
     app.register_blueprint(home_bp)
     app.register_blueprint(asset_bp)
@@ -34,5 +41,6 @@ def create_app():
     app.register_blueprint(procurement_bp)
     app.register_blueprint(employee_bp)
     app.register_blueprint(asset_allocation_bp)
+
 
     return app
