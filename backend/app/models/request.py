@@ -2,6 +2,7 @@ from app.models import db
 from datetime import datetime
 from enum import Enum
 from sqlalchemy import Enum as SqlEnum
+from .serializer_mixin import SerializerMixin
 
 class RequestType(Enum):
     NEWASSET = "New Asset"
@@ -19,7 +20,7 @@ class RequestStatus(Enum):
     FULFILLED = "fulfilled"
 
 
-class Request(db.Model):
+class Request(db.Model, SerializerMixin):
     __tablename__ = 'requests'
 
     id = db.Column(db.Integer, primary_key=True)
