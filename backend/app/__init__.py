@@ -21,6 +21,9 @@ def create_app():
     print(app.config)
     db.init_app(app)
 
+    from flask_cors import CORS
+    CORS(app)
+
     # Initialize all models to avoid circular dependency issues
     init_app_models()
 
