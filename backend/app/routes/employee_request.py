@@ -15,10 +15,10 @@ def get_requests():
     user_requests = Request.query.filter_by(user_id=user_id).all()
     return jsonify([r.to_dict() for r in user_requests]), 200
 
-@employee_bp.route('/request-asset', methods=['POST'])
+@employee_bp.route('/request_asset', methods=['POST'])
 @jwt_required()
 @role_required("Employee")
-def post_request(self):
+def post_request():
     data = request.get_json()
     asset_name = data.get("asset_name")
     type = data.get("type")

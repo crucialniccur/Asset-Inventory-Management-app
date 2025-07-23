@@ -3,6 +3,7 @@ from flask import request, jsonify, g
 from app.models.user import User
 import jwt
 from app.config import Config
+from flask_jwt_extended import decode_token
 
 from app.models import db
 SECRET_KEY = Config.SECRET_KEY
@@ -12,14 +13,19 @@ def role_required(*roles):
         @wraps(fn)
         def wrapper(*args, **kwargs):
             token = None
-            if 'Authorization' in request.headers:
-                token = request.headers['Authorization']
-            if not token:
-                return jsonify({"message": "Token is missing"}), 401
+            auth_header = request.headers.get("Authorization", None)
+
+            if auth_header and auth_header.startswith("Bearer "):
+                token = auth_header.split(" ")[1]
+            else:
+                return jsonify({"message": "Token is missing or malformed"}), 401
             
             try:
-                payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
-                user = db.session.get(User, payload['user_id'])
+                payload = decode_token(token) #jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
+                # print(payload)
+                user_info = payload['sub']
+                user = db.session.get(User, int(payload['sub']))    
+
                 if not user or user.role.value not in roles:
                     return jsonify({"message": "Access forbidden"}), 403
             
