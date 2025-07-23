@@ -16,6 +16,12 @@ def seed_users():
                 "role": UserRole.admin,
             },
             {
+                "name": "Procurement Manager",
+                "email": "procurement@example.com",
+                "password": "procurepass",
+                "role": UserRole.procurement,
+            },
+            {
                 "name": "Finance User",
                 "email": "finance@example.com",
                 "password": "financepass",
@@ -39,7 +45,7 @@ def seed_users():
                 )
                 user.set_password(user_data["password"])
                 db.session.add(user)
-                print(f" Seeded user: {user.email}")
+                print(f"Seeded user: {user.email}")
             else:
                 print(f" User already exists: {user_data['email']}")
 
