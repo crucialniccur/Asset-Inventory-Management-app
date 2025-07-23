@@ -9,19 +9,23 @@ def create_app():
     from app.extensions import jwt
     jwt.init_app(app)
 
-    # Import models so Alembic sees them
-    from app.models import user
-
     from flask_migrate import Migrate
     Migrate(app, db)
+
+    # Import models so Alembic detects them
+    from app.models import user, asset, category  # ✅ Ensure Alembic sees all models
 
     # Register blueprints
     from app.routes.auth import auth_bp
     from app.routes.home import home_bp
-    from app.routes.users import users_bp  # ✅ Import users blueprint
+    from app.routes.users import users_bp
+    from app.routes.assets import asset_bp
+    from app.routes.categories import category_bp  # ✅ Import categories blueprint
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(home_bp)
-    app.register_blueprint(users_bp)       # ✅ Register users blueprint
+    app.register_blueprint(users_bp)
+    app.register_blueprint(asset_bp)
+    app.register_blueprint(category_bp)  # ✅ Register categories blueprint
 
     return app
