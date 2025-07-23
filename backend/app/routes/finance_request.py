@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify
 from app.models.request import Request
-from app.utils.decorators import role_required
+from app.decorators import role_required
 from flask_jwt_extended import jwt_required
 
 finrequests_bp = Blueprint('financerequests', __name__, url_prefix='/finance/requests')

@@ -1,4 +1,4 @@
-from app.utils.decorators import role_required
+from app.decorators import role_required
 from app.models.allocation import Allocation
 from flask import request
 from flask_jwt_extended import jwt_required

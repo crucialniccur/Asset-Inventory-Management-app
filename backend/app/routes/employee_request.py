@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.models.request import Request
-from app.utils.decorators import role_required
+from app.decorators import role_required
 
 from models import db
 
