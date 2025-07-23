@@ -17,3 +17,14 @@ class Asset(db.Model):
 
     def __repr__(self):
         return f"<Asset {self.name} - {self.status}>"
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "category_id": self.category_id,
+            "description": self.description,
+            "quantity": self.quantity,
+            "status": self.status,
+            "created_at": self.created_at.isoformat() if self.created_at else None
+        }

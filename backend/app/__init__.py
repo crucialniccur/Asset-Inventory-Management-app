@@ -17,9 +17,11 @@ def create_app():
 
     # Register blueprints
     from app.routes.auth import auth_bp
-    from app.routes.home import home_bp  # ✅ Add this line
+    from app.routes.home import home_bp
+    from app.routes.users import users_bp  # ✅ Import users blueprint
 
     app.register_blueprint(auth_bp)
-    app.register_blueprint(home_bp)     # ✅ Register the home blueprint
+    app.register_blueprint(home_bp)
+    app.register_blueprint(users_bp)       # ✅ Register users blueprint
 
     return app
