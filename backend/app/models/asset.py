@@ -1,4 +1,4 @@
-from app.models import db
+from app.models import db, category, allocation
 from datetime import datetime
 
 class Asset(db.Model):

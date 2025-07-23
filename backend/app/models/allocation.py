@@ -1,4 +1,4 @@
-from app.models import db
+from app.models import db, asset, user
 from datetime import datetime
 
 class Allocation(db.Model):
