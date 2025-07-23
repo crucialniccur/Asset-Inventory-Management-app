@@ -7,7 +7,7 @@ from app.models import db
 
 employee_bp = Blueprint('employee', __name__, url_prefix='/employee')
 
-@employee_bp.route('/my-requests', methods=['GET'])
+@employee_bp.route('/my_requests', methods=['GET'])
 @jwt_required()
 @role_required("Employee")
 def get_requests():
