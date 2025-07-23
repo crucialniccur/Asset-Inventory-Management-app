@@ -4,7 +4,7 @@ from datetime import datetime
 from sqlalchemy import Enum as PgEnum
 import enum
 
-from app.models import db
+from app.models import db, request, allocation
 
 class UserRole(enum.Enum):
     admin = "Admin"

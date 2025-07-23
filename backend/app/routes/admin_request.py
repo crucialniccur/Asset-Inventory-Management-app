@@ -1,11 +1,11 @@
 from flask import Blueprint, jsonify
-from models.request import Request, db
-from decorators import role_required
+from app.models.request import Request, db
+from app.decorators import role_required
 from flask_jwt_extended import jwt_required
 
-requests_bp = Blueprint('adminreq', __name__, url_prefix='/admin')
+requests_bp = Blueprint('adminreq', __name__, url_prefix='/admin/requests')
 
-@requests_bp.route('/requests', methods=['GET'])
+@requests_bp.route('/', methods=['GET'])
 @jwt_required()
 @role_required("Admin")
 def get_all_requests():

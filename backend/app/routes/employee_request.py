@@ -1,16 +1,24 @@
 from flask import Blueprint, jsonify, request
-from flask_jwt_extended import jwt_required
-from models.request import Request
-from decorators import role_required
+from flask_jwt_extended import jwt_required, get_jwt_identity
+from app.models.request import Request
+from app.decorators import role_required
 
-from models import db
+from app.models import db
 
 employee_bp = Blueprint('employee', __name__, url_prefix='/employee')
 
-@employee_bp.route('/request/<int:', methods=['POST'])
+@employee_bp.route('/my_requests', methods=['GET'])
 @jwt_required()
 @role_required("Employee")
-def post_request(self):
+def get_requests():
+    user_id = get_jwt_identity()
+    user_requests = Request.query.filter_by(user_id=user_id).all()
+    return jsonify([r.to_dict() for r in user_requests]), 200
+
+@employee_bp.route('/request_asset', methods=['POST'])
+@jwt_required()
+@role_required("Employee")
+def post_request():
     data = request.get_json()
     asset_name = data.get("asset_name")
     type = data.get("type")
