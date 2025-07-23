@@ -5,7 +5,7 @@ from app.utils.decorators import role_required
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
 
-@auth_bp.route('/register', methods=['POST'])
+@auth_bp.route('/register', methods=['POST', 'OPTIONS'])
 @jwt_required()
 @role_required('admin')
 def register():
