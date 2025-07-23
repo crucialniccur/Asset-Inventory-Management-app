@@ -1,10 +1,11 @@
 from functools import wraps
 from flask import request, jsonify, g
-from app.models import User
+from app.models.user import User
 import jwt
-from config import SECRET_KEY
+from app.config import Config
 
-from models import db
+from app.models import db
+SECRET_KEY = Config.SECRET_KEY
 
 def role_required(*roles):
     def decorator(fn):

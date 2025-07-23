@@ -3,11 +3,11 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.models.request import Request
 from app.decorators import role_required
 
-from models import db
+from app.models import db
 
 employee_bp = Blueprint('employee', __name__, url_prefix='/employee')
 
-@employee_bp.route('/my-requests', method=['GET'])
+@employee_bp.route('/my-requests', methods=['GET'])
 @jwt_required()
 @role_required("Employee")
 def get_requests():
