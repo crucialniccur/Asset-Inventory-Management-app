@@ -22,9 +22,9 @@ class User(db.Model):
     role = db.Column(PgEnum(UserRole, name="user_role_enum"), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-    # Relationships (to be completed by Samuel)
-    # requests = db.relationship('Request', backref='user', lazy=True)
-    # allocations = db.relationship('Allocation', backref='user', lazy=True)
+    # ✅ Relationships added:
+    requests = db.relationship("Request", back_populates="user", cascade="all, delete-orphan")
+    allocations = db.relationship("Allocation", back_populates="user", cascade="all, delete-orphan")
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
