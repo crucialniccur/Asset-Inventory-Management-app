@@ -1,0 +1,13 @@
+from flask import Blueprint, jsonify
+from app.models.request import Request
+from app.decorators import role_required
+from flask_jwt_extended import jwt_required
+
+finrequests_bp = Blueprint('financerequests', __name__, url_prefix='/finance/requests')
+
+@finrequests_bp.route('/', methods=['GET'])
+@jwt_required()
+@role_required("Finance")
+def get_all_requests():
+    requests = Request.query.all()
+    return jsonify([r.to_dict() for r in requests]), 200

@@ -4,8 +4,7 @@ from datetime import datetime
 from sqlalchemy import Enum as PgEnum
 import enum
 
-# Shared db instance
-from app.models import db
+from app.models import db, request, allocation
 
 class UserRole(enum.Enum):
     admin = "Admin"
@@ -25,12 +24,15 @@ class User(db.Model):
     # ✅ Relationships added:
     requests = db.relationship("Request", back_populates="user", cascade="all, delete-orphan")
     allocations = db.relationship("Allocation", back_populates="user", cascade="all, delete-orphan")
-
+   
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
+    
+    def has_role(self, *roles):
+        return self.role.name in roles
 
     def __repr__(self):
         return f'<User {self.name}>'

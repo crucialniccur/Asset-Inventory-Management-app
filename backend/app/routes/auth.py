@@ -1,7 +1,8 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from app.models.user import db, User, UserRole
-from app.utils.decorators import role_required
+from app.decorators import role_required
+from datetime import timedelta
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
 
@@ -37,7 +38,15 @@ def login():
     if not user or not user.check_password(password):
         return jsonify({'error': 'Invalid credentials'}), 401
 
-    access_token = create_access_token(identity={'id': user.id, 'role': user.role.value, 'email': user.email})
+    print(user.id)
+    access_token = create_access_token(
+        identity=str(user.id), 
+        expires_delta=timedelta(hours=1),
+         additional_claims={'id': user.id, 'role': user.role.value, 'email': user.email}
+        )       
+
+    # {'id': user.id, 'role': user.role.value, 'email': user.email}
+    # additional_claims={'id': user.id, 'role': user.role.value, 'email': user.email}
     return jsonify({'access_token': access_token}), 200
 
 @auth_bp.route('/me', methods=['GET'])

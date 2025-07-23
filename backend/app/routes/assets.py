@@ -1,5 +1,3 @@
-# backend/app/routes/assets.py
-
 from flask import Blueprint, request, jsonify
 from app.models.asset import Asset
 from app.models import db
