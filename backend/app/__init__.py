@@ -40,7 +40,7 @@ def create_app():
     from app.routes.auth import auth_bp
     from app.routes.home import home_bp
     from app.routes.users import users_bp
-    from app.routes.assets import asset_bp
+    from app.routes.assets import assets_bp
     from app.routes.categories import category_bp
     from app.routes.admin_request import requests_bp
     from app.routes.allocation import asset_allocation_bp
@@ -53,7 +53,7 @@ def create_app():
     app.register_blueprint(category_bp)
     app.register_blueprint(auth_bp)
     app.register_blueprint(home_bp)
-    app.register_blueprint(asset_bp)
+    app.register_blueprint(assets_bp)
     app.register_blueprint(requests_bp)
     app.register_blueprint(finrequests_bp)
     app.register_blueprint(procurement_bp)
