@@ -1,4 +1,4 @@
-from app.models import db, asset, user
+from app.models import db, asset, user, request
 from datetime import datetime
 
 class Allocation(db.Model):
@@ -12,7 +12,7 @@ class Allocation(db.Model):
 
     asset = db.relationship("Asset", back_populates="allocations")
     user = db.relationship("User", back_populates="allocations")
-    request = db.relationship("Request", back_populates="allocations")
+    request = db.relationship("Request", back_populates="allocation")
 
     def __repr__(self):
         return f"<Allocation Asset {self.asset_id} -> User {self.user_id}>"
