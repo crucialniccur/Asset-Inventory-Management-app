@@ -3,25 +3,47 @@ import axios from 'axios';
 
 const BASE_URL = 'http://localhost:5000';
 
-// 🔐 LOGIN
-export const loginUser = createAsyncThunk('auth/loginUser', async (credentials, thunkAPI) => {
-  try {
-    const res = await axios.post(`${BASE_URL}/login`, credentials);
-    return res.data; 
-  } catch (err) {
-    return thunkAPI.rejectWithValue(err.response?.data?.message || 'Login failed');
-  }
+
+axios.defaults.headers.post['Content-Type'] = 'application/json';
+
+
+const api = axios.create({
+  baseURL: BASE_URL,
+  timeout: 10000,
+  headers: {
+    'Content-Type': 'application/json',
+  },
 });
 
-// 📝 REGISTER
-export const registerUser = createAsyncThunk('auth/registerUser', async (credentials, thunkAPI) => {
-  try {
-    const res = await axios.post(`${BASE_URL}/register`, credentials);
-    return res.data; 
-  } catch (err) {
-    return thunkAPI.rejectWithValue(err.response?.data?.message || 'Registration failed');
+// 🔐 LOGIN
+export const loginUser = createAsyncThunk(
+  'auth/loginUser',
+  async (credentials, { rejectWithValue }) => {
+    try {
+      const res = await api.post('/login', credentials);
+      return res.data;
+    } catch (err) {
+      return rejectWithValue(
+        err.response?.data?.message || err.message || 'Login failed'
+      );
+    }
   }
-});
+);
+
+// 📝 REGISTER
+export const registerUser = createAsyncThunk(
+  'auth/registerUser',
+  async (credentials, { rejectWithValue }) => {
+    try {
+      const res = await api.post('/register', credentials);
+      return res.data;
+    } catch (err) {
+      return rejectWithValue(
+        err.response?.data?.message || err.message || 'Registration failed'
+      );
+    }
+  }
+);
 
 const authSlice = createSlice({
   name: 'auth',
@@ -36,10 +58,17 @@ const authSlice = createSlice({
       state.user = null;
       state.token = null;
       localStorage.removeItem('token');
+      delete api.defaults.headers.common['Authorization']; 
+    },
+    setCredentials(state, action) {
+      state.token = action.payload;
+      localStorage.setItem('token', action.payload);
+      api.defaults.headers.common['Authorization'] = `Bearer ${action.payload}`;
     },
   },
   extraReducers: (builder) => {
     builder
+      // Login cases
       .addCase(loginUser.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -49,12 +78,14 @@ const authSlice = createSlice({
         state.user = action.payload.user;
         state.token = action.payload.token;
         localStorage.setItem('token', action.payload.token);
+        api.defaults.headers.common['Authorization'] = `Bearer ${action.payload.token}`;
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })
 
+      // Registration cases
       .addCase(registerUser.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -62,8 +93,9 @@ const authSlice = createSlice({
       .addCase(registerUser.fulfilled, (state, action) => {
         state.loading = false;
         state.token = action.payload.token;
-        state.user = null; // or decode token if you want user info
+        state.user = action.payload.user || null; // Some APIs return user on register
         localStorage.setItem('token', action.payload.token);
+        api.defaults.headers.common['Authorization'] = `Bearer ${action.payload.token}`;
       })
       .addCase(registerUser.rejected, (state, action) => {
         state.loading = false;
@@ -72,5 +104,5 @@ const authSlice = createSlice({
   },
 });
 
-export const { logout } = authSlice.actions;
+export const { logout, setCredentials } = authSlice.actions;
 export default authSlice.reducer;

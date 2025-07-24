@@ -15,7 +15,7 @@ export default function RegisterPage() {
       name: '',
       email: '',
       password: '',
-      role: 'employee', // 👈 Default role
+      role: 'employee', 
     },
     validationSchema: Yup.object({
       name: Yup.string().required('Name is required'),
