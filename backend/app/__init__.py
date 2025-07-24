@@ -4,7 +4,6 @@ from dotenv import load_dotenv
 import os
 import cloudinary
 
-
 load_dotenv()
 
 cloudinary.config(
@@ -18,13 +17,11 @@ cloudinary.config(
 def create_app():
     app = Flask(__name__)
     app.config.from_object('app.config.Config')
-    print(app.config)
     db.init_app(app)
 
     from flask_cors import CORS
     CORS(app)
 
-    # Initialize all models to avoid circular dependency issues
     init_app_models()
 
     from app.extensions import jwt
@@ -33,10 +30,10 @@ def create_app():
     from flask_migrate import Migrate
     Migrate(app, db)
 
-    # Import models so Alembic detects them
+    # 👀 Alembic auto-detects models through imports
     from app.models import user, asset, category
 
-    # Register blueprints
+    # 💉 Register all your blueprints
     from app.routes.auth import auth_bp
     from app.routes.home import home_bp
     from app.routes.users import users_bp

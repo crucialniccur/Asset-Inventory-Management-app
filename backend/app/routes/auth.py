@@ -55,7 +55,8 @@ def login():
 @jwt_required()
 def me():
     identity = get_jwt_identity()
-    user = User.query.get(identity)
+    user = User.query.get(int(identity))  # Cast string to int
+    # user = User.query.get(identity)
     # user = User.query.get(identity['id']) i changed here too
     if not user:
         return jsonify({'error': 'User not found'}), 404
