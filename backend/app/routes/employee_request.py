@@ -1,3 +1,4 @@
+from datetime import datetime
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.models.request import Request
@@ -27,6 +28,8 @@ def post_request():
     if not all([asset_name, type, reason, urgency]):
         return jsonify({'error': 'Missing required fields'}), 400
     new_request = Request(**data)
+    new_request.requested_at = datetime.utcnow().strftime("%b %d, %Y at %I:%M %p")
+
     db.session.add(new_request)
     db.session.commit()
     return {"message": f" Request for {asset_name} submitted successfully"}, 201

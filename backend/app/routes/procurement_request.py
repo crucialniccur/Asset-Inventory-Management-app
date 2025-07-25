@@ -1,4 +1,5 @@
-from flask import Blueprint, jsonify
+from datetime import datetime
+from flask import Blueprint, jsonify, request
 from app.models.request import Request, RequestStatus
 from app.decorators import role_required
 from flask_jwt_extended import jwt_required
@@ -40,3 +41,23 @@ def fulfill_request(request_id):
     request.status = RequestStatus.FULFILLED
     db.session.commit()
     return {"message": "Request fulfilled"}, 200
+
+@procurement_bp.route('/<int:request_id>/status', methods=['PATCH'])
+@jwt_required()
+@role_required("Procurement")
+def update_request_status(request_id):
+    data = request.get_json()
+    new_status = data.get("status")
+
+    if new_status not in ["APPROVED", "REJECTED"]:
+        return {"error": "Invalid status"}, 400
+
+    asset_request = Request.query.get(request_id)
+    if not asset_request:
+        return {"error": "Request not found"}, 404
+
+    asset_request.status = new_status
+    asset_request.updated_at = datetime.utcnow().strftime("%b %d, %Y at %I:%M %p")
+
+    db.session.commit()
+    return {"message": f"Request {new_status.lower()}."}, 200

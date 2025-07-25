@@ -1,4 +1,4 @@
-from app.models import db
+from app.models import db, allocation
 from datetime import datetime
 from enum import Enum
 from sqlalchemy import Enum as SqlEnum
@@ -37,8 +37,10 @@ class Request(db.Model, SerializerMixin):
     status = db.Column(SqlEnum(RequestStatus),
                        default=RequestStatus.PENDING, nullable=False)
     requested_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     user = db.relationship("User", back_populates="requests")
+    allocation = db.relationship("Allocation", back_populates="request")
 
     allocations = db.relationship(
         "Allocation", back_populates="request", lazy='dynamic')
