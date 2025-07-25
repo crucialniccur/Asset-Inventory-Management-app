@@ -11,6 +11,34 @@ auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
 # @jwt_required() # commented out for now
 # @role_required('admin') # remove this a little bit i am testing.........
 def register():
+    """
+    Register a new user...
+    ---
+    tags:
+      - Authentication
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - username
+              - email
+              - password
+            properties:
+              username:
+                type: string
+              email:
+                type: string
+              password:
+                type: string
+    responses:
+      201:
+        description: User registered successfully
+      400:
+        description: Missing or invalid data
+    """
     data = request.get_json()
     name = data.get('name')
     email = data.get('email')
@@ -32,6 +60,31 @@ def register():
 
 @auth_bp.route('/login', methods=['POST'])
 def login():
+    """
+    Login a user
+    ---
+    tags:
+      - Authentication
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - email
+              - password
+            properties:
+              email:
+                type: string
+              password:
+                type: string
+    responses:
+      200:
+        description: Login successful, returns JWT token
+      401:
+        description: Invalid email or password
+    """
     data = request.get_json()
     email = data.get('email')
     password = data.get('password')
