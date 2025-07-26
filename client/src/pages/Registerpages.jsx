@@ -36,7 +36,7 @@ export default function RegisterPage() {
   });
 
   return (
-    <div className="min-vh-100 d-flex align-items-center justify-content-center" style={{ background: 'linear-gradient(to right, #4e54c8, #8f94fb)' }}>
+    <div className="min-vh-100 d-flex align-items-center justify-content-center" style={{ background: 'linear-gradient(to right, #4248b3ff, #959af3ff)' }}>
       <div className="bg-white rounded-4 shadow p-4 w-100" style={{ maxWidth: '400px' }}>
         <div className="text-center mb-4">
           <img src="/logo.png" alt="Logo" width={200} className="mb-2" />
