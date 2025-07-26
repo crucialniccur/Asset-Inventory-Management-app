@@ -2,11 +2,42 @@ from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required
 from app.decorators import role_required
 from app.models.asset import db, Asset
+from flasgger.utils import swag_from
 
 assets_bp = Blueprint('assets', __name__, url_prefix='/assets')
 
 
 @assets_bp.route('/', methods=['POST'])
+@swag_from({
+    "tags": ["Assets"],
+    "description": "Create a new asset record.",
+    "parameters": [
+        {
+            "name": "body",
+            "in": "body",
+            "required": True,
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "name": {"type": "string"},
+                    "description": {"type": "string"},
+                    "quantity": {"type": "integer"},
+                    "category_id": {"type": "integer"},
+                    "image_url": {"type": "string"}
+                },
+                "required": ["name", "category_id"]
+            }
+        }
+    ],
+    "responses": {
+        201: {
+            "description": "Asset created successfully"
+        },
+        400: {
+            "description": "Missing required fields"
+        }
+    }
+})
 @jwt_required()
 @role_required('Admin')
 def create_asset():
@@ -16,7 +47,6 @@ def create_asset():
     description = data.get('description', '')
     quantity = data.get('quantity', 1)
     category_id = data.get('category_id')
-    # This comes from /upload/image response
     image_url = data.get('image_url', None)
 
     if not name or not category_id:
@@ -37,6 +67,42 @@ def create_asset():
 
 
 @assets_bp.route('/<int:id>', methods=['PATCH'])
+@swag_from({
+    "tags": ["Assets"],
+    "description": "Update an existing asset by ID.",
+    "parameters": [
+        {
+            "name": "id",
+            "in": "path",
+            "type": "integer",
+            "required": True,
+            "description": "Asset ID"
+        },
+        {
+            "name": "body",
+            "in": "body",
+            "required": True,
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "name": {"type": "string"},
+                    "description": {"type": "string"},
+                    "quantity": {"type": "integer"},
+                    "category_id": {"type": "integer"},
+                    "image_url": {"type": "string"}
+                }
+            }
+        }
+    ],
+    "responses": {
+        200: {
+            "description": "Asset updated successfully"
+        },
+        404: {
+            "description": "Asset not found"
+        }
+    }
+})
 @jwt_required()
 @role_required('Admin')
 def update_asset(id):
@@ -54,6 +120,27 @@ def update_asset(id):
 
 
 @assets_bp.route('/<int:id>', methods=['DELETE'])
+@swag_from({
+    "tags": ["Assets"],
+    "description": "Delete an asset by ID.",
+    "parameters": [
+        {
+            "name": "id",
+            "in": "path",
+            "type": "integer",
+            "required": True,
+            "description": "Asset ID"
+        }
+    ],
+    "responses": {
+        200: {
+            "description": "Asset deleted successfully"
+        },
+        404: {
+            "description": "Asset not found"
+        }
+    }
+})
 @jwt_required()
 @role_required('Admin')
 def delete_asset(id):

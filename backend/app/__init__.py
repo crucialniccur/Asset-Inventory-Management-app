@@ -3,6 +3,7 @@ from app.models import db, init_app_models
 from dotenv import load_dotenv
 import os
 import cloudinary
+from flasgger import Swagger
 
 load_dotenv()
 
@@ -18,6 +19,7 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object('app.config.Config')
     db.init_app(app)
+    Swagger(app)
 
     from flask_cors import CORS
     CORS(app)
