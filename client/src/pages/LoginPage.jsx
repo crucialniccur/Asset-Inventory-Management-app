@@ -44,10 +44,12 @@ export default function LoginPage() {
                 id="email"
                 name="email"
                 placeholder="Enter your email"
+                style={{ backgroundColor: '#f9f9f9', border: '1px solid #ced4da' }}
                 value={form.email}
                 onChange={handleChange}
                 required
               />
+              
             </div>
           </div>
 
