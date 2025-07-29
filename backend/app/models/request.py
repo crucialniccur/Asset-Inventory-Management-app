@@ -40,7 +40,6 @@ class Request(db.Model, SerializerMixin):
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     user = db.relationship("User", back_populates="requests")
-    allocation = db.relationship("Allocation", back_populates="request")
 
     allocations = db.relationship(
         "Allocation", back_populates="request", lazy='dynamic')
