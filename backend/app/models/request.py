@@ -9,19 +9,16 @@ class RequestType(Enum):
     NEWASSET = "New Asset"
     REPAIR = "Repair"
 
-
 class RequestUrgency(Enum):
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
-
 
 class RequestStatus(Enum):
     PENDING = "pending"
     APPROVED = "approved"
     REJECTED = "rejected"
     FULFILLED = "fulfilled"
-
 
 class Request(db.Model, SerializerMixin):
     __tablename__ = 'requests'
