@@ -9,19 +9,16 @@ class RequestType(Enum):
     NEWASSET = "New Asset"
     REPAIR = "Repair"
 
-
 class RequestUrgency(Enum):
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
-
 
 class RequestStatus(Enum):
     PENDING = "pending"
     APPROVED = "approved"
     REJECTED = "rejected"
     FULFILLED = "fulfilled"
-
 
 class Request(db.Model, SerializerMixin):
     __tablename__ = 'requests'
@@ -40,7 +37,6 @@ class Request(db.Model, SerializerMixin):
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     user = db.relationship("User", back_populates="requests")
-    allocation = db.relationship("Allocation", back_populates="request")
 
     allocations = db.relationship(
         "Allocation", back_populates="request", lazy='dynamic')

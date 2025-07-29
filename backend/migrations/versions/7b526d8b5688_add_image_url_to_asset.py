@@ -29,9 +29,9 @@ def upgrade():
     with op.batch_alter_table('assets', schema=None) as batch_op:
         batch_op.add_column(sa.Column('image_url', sa.String(length=255), nullable=True))
 
-    with op.batch_alter_table('categories', schema=None) as batch_op:
-        batch_op.add_column(sa.Column('description', sa.Text(), nullable=True))
-        batch_op.add_column(sa.Column('created_at', sa.DateTime(), nullable=True))
+    """ with op.batch_alter_table('categories', schema=None) as batch_op:
+        batch_op.add_column(sa.Column('description', sa.Text(), nullable=True)) 
+        batch_op.add_column(sa.Column('created_at', sa.DateTime(), nullable=True)) """
 
     # ### end Alembic commands ###
 
