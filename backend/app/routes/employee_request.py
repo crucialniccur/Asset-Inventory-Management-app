@@ -65,15 +65,32 @@ def get_requests():
 def post_request():
     data = request.get_json()
     asset_name = data.get("asset_name")
-    type = data.get("type")
+    type_ = data.get("type")
     reason = data.get("reason")
     urgency = data.get("urgency")
-    if not all([asset_name, type, reason, urgency]):
+
+    if not all([asset_name, type_, reason, urgency]):
         return jsonify({'error': 'Missing required fields'}), 400
 
-    new_request = Request(**data)
-    new_request.requested_at = datetime.utcnow().strftime("%b %d, %Y at %I:%M %p")
+    user_id = get_jwt_identity()
+
+    new_request = Request(
+        asset_name=asset_name,
+        type=type_,
+        reason=reason,
+        urgency=urgency,
+        status="PENDING",
+        requested_at=datetime.utcnow().strftime("%b %d, %Y at %I:%M %p"),
+        user_id=user_id
+    )
 
     db.session.add(new_request)
     db.session.commit()
-    return {"message": f" Request for {asset_name} submitted successfully"}, 201
+
+    return {"message": f"Request for {asset_name} submitted successfully"}, 201
+
+
+
+
+
+
