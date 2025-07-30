@@ -9,16 +9,19 @@ class RequestType(Enum):
     NEWASSET = "New Asset"
     REPAIR = "Repair"
 
+
 class RequestUrgency(Enum):
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
+
 
 class RequestStatus(Enum):
     PENDING = "pending"
     APPROVED = "approved"
     REJECTED = "rejected"
     FULFILLED = "fulfilled"
+
 
 class Request(db.Model, SerializerMixin):
     __tablename__ = 'requests'
@@ -34,7 +37,8 @@ class Request(db.Model, SerializerMixin):
     status = db.Column(SqlEnum(RequestStatus),
                        default=RequestStatus.PENDING, nullable=False)
     requested_at = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    updated_at = db.Column(
+        db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     user = db.relationship("User", back_populates="requests")
 
