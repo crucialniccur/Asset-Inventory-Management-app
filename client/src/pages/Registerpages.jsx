@@ -127,7 +127,7 @@ export default function RegisterPage() {
         </form>
 
         <div className="text-center mt-4 small text-muted">
-          
+          &copy; 2024 AssetTracker. All rights reserved.
         </div>
       </div>
     </div>
