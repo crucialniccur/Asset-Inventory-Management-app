@@ -102,7 +102,7 @@ def fulfill_request(request_id):
     return {"message": "Request fulfilled"}, 200
 
 
-@procurement_bp.route('/<int:request_id>/status', methods=['PATCH'])
+@procurement_bp.route('/<int:request_id>/status', methods=['GET'])
 @jwt_required()
 @role_required("Procurement")
 @swag_from({
