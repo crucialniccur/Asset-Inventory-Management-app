@@ -145,3 +145,42 @@ def update_category(id):
     db.session.commit()
 
     return jsonify({"id": category.id, "name": category.name}), 200
+
+
+@category_bp.route('/<int:id>', methods=['DELETE'])
+@swag_from({
+    "tags": ["Categories"],
+    "description": "Delete a category by ID",
+    "parameters": [
+        {
+            "name": "id",
+            "in": "path",
+            "type": "integer",
+            "required": True,
+            "description": "ID of the category to delete"
+        }
+    ],
+    "responses": {
+        200: {
+            "description": "Category deleted successfully",
+            "examples": {
+                "application/json": {
+                    "message": "Category deleted successfully."
+                }
+            }
+        },
+        404: {
+            "description": "Category not found"
+        }
+    }
+})
+def delete_category(id):
+    category = Category.query.get(id)
+
+    if not category:
+        return jsonify({"error": "Category not found"}), 404
+
+    db.session.delete(category)
+    db.session.commit()
+
+    return jsonify({"message": "Category deleted successfully."}), 200
