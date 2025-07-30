@@ -1,36 +1,23 @@
-from app.models import db, category, allocation
 from datetime import datetime
-
+from app.extensions import db
 
 class Asset(db.Model):
-    __tablename__ = 'assets'
+    __tablename__ = "assets"
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
-    category_id = db.Column(db.Integer, db.ForeignKey(
-        'categories.id'), nullable=False)
+    name = db.Column(db.String(120), nullable=False)
     description = db.Column(db.Text)
-    quantity = db.Column(db.Integer, default=1)
-    status = db.Column(db.String(50), default='available')
-    #  New field for Cloudinary image URL
-    image_url = db.Column(db.String(255))
+    image_url = db.Column(db.String)
+    brand = db.Column(db.String(100))
+    model_number = db.Column(db.String(100))
+    serial_number = db.Column(db.String(100))
+    condition = db.Column(db.String(50))
+    status = db.Column(db.String(50), default="available")
+    category_id = db.Column(db.Integer, db.ForeignKey('categories.id'))
+    created_by = db.Column(db.Integer, db.ForeignKey('users.id'))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
+    # ✅ Relationships
+    allocations = db.relationship("Allocation", back_populates="asset", cascade="all, delete")
     category = db.relationship("Category", back_populates="assets")
-    allocations = db.relationship(
-        "Allocation", back_populates="asset", cascade="all, delete-orphan")
-
-    def __repr__(self):
-        return f"<Asset {self.name} - {self.status}>"
-
-    def to_dict(self):
-        return {
-            "id": self.id,
-            "name": self.name,
-            "category_id": self.category_id,
-            "description": self.description,
-            "quantity": self.quantity,
-            "status": self.status,
-            "image_url": self.image_url,  # Include in dict
-            "created_at": self.created_at.isoformat() if self.created_at else None
-        }
+    creator = db.relationship("User", back_populates="created_assets", foreign_keys=[created_by])
