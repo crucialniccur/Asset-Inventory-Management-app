@@ -41,7 +41,7 @@ export default function RegisterPage() {
         <div className="text-center mb-4">
           <img src="/logo.png" alt="Logo" width={200} className="mb-2" />
           <h4 className="fw-bold">AssetTracker</h4>
-          <p className="text-muted">Create an account to get started</p>
+          <p className="text-muted">Create an account to get started.</p>
         </div>
 
         <form onSubmit={formik.handleSubmit}>
@@ -127,7 +127,7 @@ export default function RegisterPage() {
         </form>
 
         <div className="text-center mt-4 small text-muted">
-          &copy; 2024 AssetTracker. All rights reserved.
+          
         </div>
       </div>
     </div>
