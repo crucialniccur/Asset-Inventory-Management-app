@@ -6,11 +6,13 @@ import enum
 
 from app.models import db, request, allocation
 
+
 class UserRole(enum.Enum):
-    admin = "Admin"
-    procurement = "Procurement"
-    finance = "Finance"
-    employee = "Employee"
+    admin = "admin"
+    procurement = "procurement"
+    finance = "finance"
+    employee = "employee"
+
 
 class User(db.Model):
     __tablename__ = 'users'
@@ -22,15 +24,17 @@ class User(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     # ✅ Relationships added:
-    requests = db.relationship("Request", back_populates="user", cascade="all, delete-orphan")
-    allocations = db.relationship("Allocation", back_populates="user", cascade="all, delete-orphan")
-   
+    requests = db.relationship(
+        "Request", back_populates="user", cascade="all, delete-orphan")
+    allocations = db.relationship(
+        "Allocation", back_populates="user", cascade="all, delete-orphan")
+
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
-    
+
     def has_role(self, *roles):
         return self.role.name in roles
 
