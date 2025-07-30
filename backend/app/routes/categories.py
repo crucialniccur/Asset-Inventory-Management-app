@@ -78,3 +78,70 @@ def create_category():
     db.session.commit()
 
     return jsonify({"id": new_category.id, "name": new_category.name}), 201
+
+
+@category_bp.route('/<int:id>', methods=['PATCH'])
+@swag_from({
+    "tags": ["Categories"],
+    "description": "Update a category by ID",
+    "parameters": [
+        {
+            "name": "id",
+            "in": "path",
+            "type": "integer",
+            "required": True,
+            "description": "ID of the category to update"
+        },
+        {
+            "name": "body",
+            "in": "body",
+            "required": True,
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "name": {"type": "string"}
+                },
+                "required": ["name"]
+            }
+        }
+    ],
+    "responses": {
+        200: {
+            "description": "Category updated successfully",
+            "examples": {
+                "application/json": {
+                    "id": 4,
+                    "name": "Updated Name"
+                }
+            }
+        },
+        400: {
+            "description": "Missing or invalid data"
+        },
+        404: {
+            "description": "Category not found"
+        },
+        409: {
+            "description": "Category with this name already exists"
+        }
+    }
+})
+def update_category(id):
+    data = request.get_json()
+    new_name = data.get('name')
+
+    if not new_name:
+        return jsonify({"error": "Category name is required"}), 400
+
+    category = Category.query.get(id)
+    if not category:
+        return jsonify({"error": "Category not found"}), 404
+
+    # Check for uniqueness
+    if Category.query.filter_by(name=new_name).first():
+        return jsonify({"error": "Category already exists"}), 409
+
+    category.name = new_name
+    db.session.commit()
+
+    return jsonify({"id": category.id, "name": category.name}), 200
