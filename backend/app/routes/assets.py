@@ -7,6 +7,31 @@ from flasgger.utils import swag_from
 assets_bp = Blueprint('assets', __name__, url_prefix='/assets')
 
 
+@assets_bp.route('/', methods=['GET'])
+@swag_from({
+    "tags": ["Assets"],
+    "description": "Get all assets",
+    "responses": {
+        200: {
+            "description": "A list of assets"
+        }
+    }
+})
+@jwt_required()
+@role_required('Admin')
+def get_assets():
+    assets = Asset.query.all()
+    return jsonify([asset.to_dict() for asset in assets]), 200
+
+
+@assets_bp.route('/<int:id>', methods=['GET'])
+@jwt_required()
+@role_required('Admin')
+def get_asset(id):
+    asset = Asset.query.get_or_404(id)
+    return jsonify(asset.to_dict()), 200
+
+
 @assets_bp.route('/', methods=['POST'])
 @swag_from({
     "tags": ["Assets"],
