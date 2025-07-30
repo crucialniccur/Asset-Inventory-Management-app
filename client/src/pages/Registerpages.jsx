@@ -99,7 +99,25 @@ export default function RegisterPage() {
             {formik.errors.password && <div className="text-danger small">{formik.errors.password}</div>}
           </div>
 
-          
+          <div className="mb-3">
+            <label className="form-label">Role</label>
+            <div className="input-group">
+              <span className="input-group-text"><i className="bi bi-briefcase"></i></span>
+              <select
+                name="role"
+                className="form-select"
+                value={formik.values.role}
+                onChange={formik.handleChange}
+              >
+                <option value="employee">Employee</option>
+                <option value="admin">Admin</option>
+                <option value="procurement_manager">Procurement Manager</option>
+              </select>
+            </div>
+            {formik.errors.role && <div className="text-danger small">{formik.errors.role}</div>}
+          </div>
+
+          {error && <div className="text-danger text-center small">{error}</div>}
 
           <button type="submit" className="btn btn-primary w-100 mt-2" disabled={loading}>
             {loading ? 'Registering...' : 'Register'}
