@@ -12,9 +12,7 @@ assets_bp = Blueprint('assets', __name__, url_prefix='/assets')
     "tags": ["Assets"],
     "description": "Get all assets",
     "responses": {
-        200: {
-            "description": "A list of assets"
-        }
+        200: {"description": "A list of assets"}
     }
 })
 @jwt_required()
@@ -25,6 +23,21 @@ def get_assets():
 
 
 @assets_bp.route('/<int:id>', methods=['GET'])
+@swag_from({
+    "tags": ["Assets"],
+    "description": "Get a single asset by ID",
+    "parameters": [{
+        "name": "id",
+        "in": "path",
+        "type": "integer",
+        "required": True,
+        "description": "Asset ID"
+    }],
+    "responses": {
+        200: {"description": "Asset found"},
+        404: {"description": "Asset not found"}
+    }
+})
 @jwt_required()
 @role_required('Admin')
 def get_asset(id):
@@ -35,39 +48,32 @@ def get_asset(id):
 @assets_bp.route('/', methods=['POST'])
 @swag_from({
     "tags": ["Assets"],
-    "description": "Create a new asset record.",
-    "parameters": [
-        {
-            "name": "body",
-            "in": "body",
-            "required": True,
-            "schema": {
-                "type": "object",
-                "properties": {
-                    "name": {"type": "string"},
-                    "description": {"type": "string"},
-                    "quantity": {"type": "integer"},
-                    "category_id": {"type": "integer"},
-                    "image_url": {"type": "string"}
-                },
-                "required": ["name", "category_id"]
-            }
+    "description": "Create a new asset record",
+    "parameters": [{
+        "name": "body",
+        "in": "body",
+        "required": True,
+        "schema": {
+            "type": "object",
+            "properties": {
+                "name": {"type": "string"},
+                "description": {"type": "string"},
+                "quantity": {"type": "integer"},
+                "category_id": {"type": "integer"},
+                "image_url": {"type": "string"}
+            },
+            "required": ["name", "category_id"]
         }
-    ],
+    }],
     "responses": {
-        201: {
-            "description": "Asset created successfully"
-        },
-        400: {
-            "description": "Missing required fields"
-        }
+        201: {"description": "Asset created"},
+        400: {"description": "Missing required fields"}
     }
 })
 @jwt_required()
 @role_required('Admin')
 def create_asset():
     data = request.get_json()
-
     name = data.get('name')
     description = data.get('description', '')
     quantity = data.get('quantity', 1)
@@ -82,7 +88,7 @@ def create_asset():
         description=description,
         quantity=quantity,
         category_id=category_id,
-        image_url=image_url,
+        image_url=image_url
     )
 
     db.session.add(new_asset)
@@ -94,7 +100,7 @@ def create_asset():
 @assets_bp.route('/<int:id>', methods=['PATCH'])
 @swag_from({
     "tags": ["Assets"],
-    "description": "Update an existing asset by ID.",
+    "description": "Partially update asset by ID",
     "parameters": [
         {
             "name": "id",
@@ -114,18 +120,15 @@ def create_asset():
                     "description": {"type": "string"},
                     "quantity": {"type": "integer"},
                     "category_id": {"type": "integer"},
-                    "image_url": {"type": "string"}
+                    "image_url": {"type": "string"},
+                    "status": {"type": "string"}
                 }
             }
         }
     ],
     "responses": {
-        200: {
-            "description": "Asset updated successfully"
-        },
-        404: {
-            "description": "Asset not found"
-        }
+        200: {"description": "Asset updated"},
+        404: {"description": "Asset not found"}
     }
 })
 @jwt_required()
@@ -139,6 +142,65 @@ def update_asset(id):
     asset.quantity = data.get('quantity', asset.quantity)
     asset.category_id = data.get('category_id', asset.category_id)
     asset.image_url = data.get('image_url', asset.image_url)
+    asset.status = data.get('status', asset.status)
+
+    db.session.commit()
+    return jsonify(asset.to_dict()), 200
+
+
+@assets_bp.route('/<int:id>', methods=['PUT'])
+@swag_from({
+    "tags": ["Assets"],
+    "description": "Fully replace an asset record by ID",
+    "parameters": [
+        {
+            "name": "id",
+            "in": "path",
+            "type": "integer",
+            "required": True,
+            "description": "Asset ID"
+        },
+        {
+            "name": "body",
+            "in": "body",
+            "required": True,
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "name": {"type": "string"},
+                    "description": {"type": "string"},
+                    "quantity": {"type": "integer"},
+                    "category_id": {"type": "integer"},
+                    "image_url": {"type": "string"},
+                    "status": {"type": "string"}
+                },
+                "required": ["name", "category_id"]
+            }
+        }
+    ],
+    "responses": {
+        200: {"description": "Asset replaced"},
+        404: {"description": "Asset not found"},
+        400: {"description": "Missing required fields"}
+    }
+})
+@jwt_required()
+@role_required('Admin')
+def replace_asset(id):
+    asset = Asset.query.get_or_404(id)
+    data = request.get_json()
+
+    name = data.get('name')
+    category_id = data.get('category_id')
+    if not name or not category_id:
+        return jsonify({"error": "Missing required fields: name and category_id"}), 400
+
+    asset.name = name
+    asset.description = data.get('description', '')
+    asset.quantity = data.get('quantity', 1)
+    asset.category_id = category_id
+    asset.image_url = data.get('image_url', None)
+    asset.status = data.get('status', 'available')
 
     db.session.commit()
     return jsonify(asset.to_dict()), 200
@@ -147,23 +209,17 @@ def update_asset(id):
 @assets_bp.route('/<int:id>', methods=['DELETE'])
 @swag_from({
     "tags": ["Assets"],
-    "description": "Delete an asset by ID.",
-    "parameters": [
-        {
-            "name": "id",
-            "in": "path",
-            "type": "integer",
-            "required": True,
-            "description": "Asset ID"
-        }
-    ],
+    "description": "Delete an asset by ID",
+    "parameters": [{
+        "name": "id",
+        "in": "path",
+        "type": "integer",
+        "required": True,
+        "description": "Asset ID"
+    }],
     "responses": {
-        200: {
-            "description": "Asset deleted successfully"
-        },
-        404: {
-            "description": "Asset not found"
-        }
+        200: {"description": "Asset deleted"},
+        404: {"description": "Asset not found"}
     }
 })
 @jwt_required()
