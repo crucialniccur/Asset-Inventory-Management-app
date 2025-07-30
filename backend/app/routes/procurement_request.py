@@ -146,4 +146,9 @@ def update_request_status(request_id):
     asset_request.updated_at = datetime.utcnow().strftime("%b %d, %Y at %I:%M %p")
 
     db.session.commit()
-    return {"message": f"Request {new_status.lower()}."}, 200
+    return {
+    "message": f"Request {new_status.lower()}.",
+    "status": asset_request.status,
+    "request_id": asset_request.id,
+    "updated_at": asset_request.updated_at
+    }, 200
