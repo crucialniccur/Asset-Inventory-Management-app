@@ -8,6 +8,7 @@ from flask_jwt_extended import decode_token
 from app.models import db
 SECRET_KEY = Config.SECRET_KEY
 
+
 def role_required(*roles):
     def decorator(fn):
         @wraps(fn)
@@ -19,21 +20,24 @@ def role_required(*roles):
                 token = auth_header.split(" ")[1]
             else:
                 return jsonify({"message": "Token is missing or malformed"}), 401
-            
+
             try:
-                payload = decode_token(token) #jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
+                # jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
+                payload = decode_token(token)
                 # print(payload)
                 user_info = payload['sub']
-                user = db.session.get(User, int(payload['sub']))    
+                user = db.session.get(User, int(payload['sub']))
 
-                if not user or user.role.value not in roles:
+                if not user or user.role.value.lower() not in [r.lower() for r in roles]:
+                    print(
+                        f"!!!! Access denied for user {user.email} with role '{user.role.value}'")
                     return jsonify({"message": "Access forbidden"}), 403
-            
+
             except jwt.ExpiredSignatureError:
                 return {"message": "Token expired"}, 401
             except jwt.InvalidTokenError:
                 return {"message": "Invalid token"}, 401
 
-            return fn(*args, **kwargs)            
+            return fn(*args, **kwargs)
         return wrapper
     return decorator
