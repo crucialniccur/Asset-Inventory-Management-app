@@ -8,14 +8,16 @@ auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
 
 
 @auth_bp.route('/register', methods=['POST'])
-# @jwt_required() # commented out for now
-# @role_required('admin') # remove this a little bit i am testing.........
+@jwt_required()
+@role_required('admin')
 def register():
     """
-    Register a new user...
+    Register a new user (Admin only)
     ---
     tags:
       - Authentication
+    security:
+      - bearerAuth: []
     requestBody:
       required: true
       content:
@@ -23,21 +25,30 @@ def register():
           schema:
             type: object
             required:
-              - username
+              - name
               - email
               - password
             properties:
-              username:
+              name:
                 type: string
               email:
                 type: string
               password:
+                type: string
+              role:
+                type: string
+                enum: [employee, procurement, finance, admin]
+              department:
                 type: string
     responses:
       201:
         description: User registered successfully
       400:
         description: Missing or invalid data
+      401:
+        description: Unauthorized - Admin access required
+      409:
+        description: Email already registered
     """
     data = request.get_json()
     name = data.get('name')

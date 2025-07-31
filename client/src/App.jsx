@@ -3,7 +3,7 @@ import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import LoginPage from './pages/LoginPage';
-import RegisterPage from './pages/Registerpages';
+
 import Dashboard from './components/Dashboard';
 import Sidebar from './components/Sidebar';
 import AssetList from './components/AssetList';
@@ -13,6 +13,7 @@ import AssetAllocation from './components/AssetAllocation';
 import RequestForm from './components/RequestForm';
 import RequestsTable from './components/RequestsTable';
 import UserManagement from './components/UserManagement';
+import AddUser from './components/AddUser';
 import Settings from './components/Settings';
 
 function PrivateRoute({ children, allowedRoles = [] }) {
@@ -49,7 +50,7 @@ function App() {
         <Routes>
           {/* Public routes */}
           <Route path="/login" element={token ? <Navigate to="/dashboard" /> : <LoginPage />} />
-          <Route path="/register" element={token ? <Navigate to="/dashboard" /> : <RegisterPage />} />
+
           
           {/* Protected routes */}
           <Route path="/dashboard" element={
@@ -115,6 +116,14 @@ function App() {
             <PrivateRoute allowedRoles={['Admin']}>
               <AppLayout>
                 <UserManagement />
+              </AppLayout>
+            </PrivateRoute>
+          } />
+          
+          <Route path="/users/add" element={
+            <PrivateRoute allowedRoles={['Admin']}>
+              <AppLayout>
+                <AddUser />
               </AppLayout>
             </PrivateRoute>
           } />
