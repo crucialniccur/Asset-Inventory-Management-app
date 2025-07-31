@@ -1,200 +1,95 @@
 from flask import Blueprint, request, jsonify
-from flasgger import swag_from
-from app.models.user import User
-from app.models import db
+from flask_jwt_extended import jwt_required, get_jwt_identity
+from app.models.user import User, UserRole
+from app.extensions import db
+from app.utils.decorators import role_required
 
-users_bp = Blueprint('users', __name__, url_prefix='/users')
+users_bp = Blueprint("users", __name__)
 
+# ✅ Get all users (Admin only)
+@users_bp.route("/", methods=["GET"])
+@jwt_required()
+@role_required("Admin")
+def get_all_users():
+    users = User.query.all()
+    return jsonify([user.to_dict() for user in users]), 200
 
-def user_to_dict(user):
-    return {
-        "id": user.id,
-        "name": user.name,
-        "email": user.email,
-        "role": user.role.value,
-        "created_at": user.created_at.isoformat()
-    }
+# ✅ Get specific user
+@users_bp.route("/<int:user_id>", methods=["GET"])
+@jwt_required()
+def get_user(user_id):
+    current_user = User.query.get(get_jwt_identity())
+    user = User.query.get(user_id)
 
+    if not user:
+        return jsonify({"error": "User not found"}), 404
 
-@users_bp.route('', methods=['GET'])
-@swag_from({
-    'tags': ['Users'],
-    'description': 'Get a list of users with pagination',
-    'parameters': [
-        {
-            'name': 'page',
-            'in': 'query',
-            'type': 'integer',
-            'default': 1,
-            'description': 'Page number'
-        },
-        {
-            'name': 'per_page',
-            'in': 'query',
-            'type': 'integer',
-            'default': 10,
-            'description': 'Number of items per page'
-        }
-    ],
-    'responses': {
-        200: {
-            'description': 'List of users'
-        }
-    }
-})
-def get_users():
-    page = request.args.get('page', 1, type=int)
-    per_page = request.args.get('per_page', 10, type=int)
-    pagination = User.query.paginate(
-        page=page, per_page=per_page, error_out=False)
-    users = [user_to_dict(user) for user in pagination.items]
+    # Users can view themselves, Admin can view all
+    if current_user.id != user_id and current_user.role != UserRole.ADMIN:
+        return jsonify({"error": "Access denied"}), 403
 
-    return jsonify({
-        "users": users,
-        "page": page,
-        "total_pages": pagination.pages,
-        "total_items": pagination.total
-    }), 200
+    return jsonify(user.to_dict()), 200
 
-
-@users_bp.route('/<int:id>', methods=['GET'])
-@swag_from({
-    'tags': ['Users'],
-    'description': 'Get a single user by ID',
-    'parameters': [
-        {
-            'name': 'id',
-            'in': 'path',
-            'type': 'integer',
-            'required': True,
-            'description': 'User ID'
-        }
-    ],
-    'responses': {
-        200: {
-            'description': 'User found'
-        },
-        404: {
-            'description': 'User not found'
-        }
-    }
-})
-def get_user(id):
-    user = User.query.get_or_404(id)
-    return jsonify(user_to_dict(user)), 200
-
-
-@users_bp.route('', methods=['POST'])
-@swag_from({
-    'tags': ['Users'],
-    'description': 'Create a new user',
-    'parameters': [
-        {
-            'name': 'body',
-            'in': 'body',
-            'required': True,
-            'schema': {
-                'type': 'object',
-                'properties': {
-                    'name': {'type': 'string'},
-                    'email': {'type': 'string'},
-                    'password': {'type': 'string'},
-                    'role': {'type': 'string'}
-                },
-                'required': ['name', 'email', 'password', 'role']
-            }
-        }
-    ],
-    'responses': {
-        201: {
-            'description': 'User created'
-        },
-        400: {
-            'description': 'Missing fields or bad request'
-        }
-    }
-})
+# ✅ Create new user (Admin only)
+@users_bp.route("/", methods=["POST"])
+@jwt_required()
+@role_required("Admin")
 def create_user():
     data = request.get_json()
-    if not data or not all(k in data for k in ['name', 'email', 'password', 'role']):
-        return jsonify({"error": "Missing fields"}), 400
+    if not data:
+        return jsonify({"error": "Missing user data"}), 400
 
-    new_user = User(
-        name=data['name'],
-        email=data['email'],
-        role=data['role']
-    )
-    new_user.set_password(data['password'])
+    if User.query.filter_by(email=data["email"]).first():
+        return jsonify({"error": "User already exists"}), 400
 
-    db.session.add(new_user)
-    db.session.commit()
+    try:
+        new_user = User(
+            name=data["name"],
+            email=data["email"],
+            department=data.get("department"),
+            role=UserRole[data["role"].upper()]
+        )
+        new_user.set_password(data["password"])
+        db.session.add(new_user)
+        db.session.commit()
+        return jsonify({"message": "User created successfully"}), 201
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
-    return jsonify(user_to_dict(new_user)), 201
+# ✅ Update user role/department/status
+@users_bp.route("/<int:user_id>", methods=["PATCH"])
+@jwt_required()
+@role_required("Admin")
+def update_user(user_id):
+    user = User.query.get(user_id)
+    if not user:
+        return jsonify({"error": "User not found"}), 404
 
+    data = request.json
+    if "role" in data:
+        try:
+            user.role = UserRole[data["role"].upper()]
+        except KeyError:
+            return jsonify({"error": "Invalid role"}), 400
 
-@users_bp.route('/<int:id>', methods=['PUT'])
-@swag_from({
-    'tags': ['Users'],
-    'description': 'Update an existing user',
-    'parameters': [
-        {
-            'name': 'id',
-            'in': 'path',
-            'type': 'integer',
-            'required': True
-        },
-        {
-            'name': 'body',
-            'in': 'body',
-            'schema': {
-                'type': 'object',
-                'properties': {
-                    'name': {'type': 'string'},
-                    'email': {'type': 'string'},
-                    'password': {'type': 'string'},
-                    'role': {'type': 'string'}
-                }
-            }
-        }
-    ],
-    'responses': {
-        200: {'description': 'User updated'},
-        404: {'description': 'User not found'}
-    }
-})
-def update_user(id):
-    user = User.query.get_or_404(id)
-    data = request.get_json()
+    if "department" in data:
+        user.department = data["department"]
 
-    user.name = data.get('name', user.name)
-    user.email = data.get('email', user.email)
-    user.role = data.get('role', user.role)
-    if 'password' in data:
-        user.set_password(data['password'])
+    if "is_active" in data:
+        user.is_active = bool(data["is_active"])
 
     db.session.commit()
-    return jsonify(user_to_dict(user)), 200
+    return jsonify(user.to_dict()), 200
 
+# ✅ Deactivate/suspend user
+@users_bp.route("/<int:user_id>", methods=["DELETE"])
+@jwt_required()
+@role_required("Admin")
+def suspend_user(user_id):
+    user = User.query.get(user_id)
+    if not user:
+        return jsonify({"error": "User not found"}), 404
 
-@users_bp.route('/<int:id>', methods=['DELETE'])
-@swag_from({
-    'tags': ['Users'],
-    'description': 'Delete a user by ID',
-    'parameters': [
-        {
-            'name': 'id',
-            'in': 'path',
-            'type': 'integer',
-            'required': True
-        }
-    ],
-    'responses': {
-        200: {'description': 'User deleted'},
-        404: {'description': 'User not found'}
-    }
-})
-def delete_user(id):
-    user = User.query.get_or_404(id)
-    db.session.delete(user)
+    user.is_active = False
     db.session.commit()
-    return jsonify({"message": "User deleted"}), 200
+    return jsonify({"message": f"User {user.email} suspended."}), 200

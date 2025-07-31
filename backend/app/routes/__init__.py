@@ -1,20 +1,32 @@
-def init_routes(app):
-    from .home import home_bp
-    from .auth import auth_bp
-    from .assets import assets_bp           # NOTE: assets_bp, not asset_bp
-    from .admin_request import requests_bp
-    from .finance_request import finrequests_bp
-    from .procurement_request import procurement_bp
-    from .employee_request import employee_bp
-    from .allocation import asset_allocation_bp
-    from .upload import upload_bp           # Added upload blueprint
+from flask import Blueprint
 
-    app.register_blueprint(home_bp)
-    app.register_blueprint(auth_bp)
-    app.register_blueprint(assets_bp)      # Use assets_bp here too
-    app.register_blueprint(requests_bp)
-    app.register_blueprint(finrequests_bp)
-    app.register_blueprint(procurement_bp)
-    app.register_blueprint(employee_bp)
-    app.register_blueprint(asset_allocation_bp)
-    app.register_blueprint(upload_bp)       # Register upload_bp
+from .auth import auth_bp
+from .users import users_bp
+from .assets import assets_bp
+from .categories import categories_bp
+from .requests import requests_bp
+from .allocations import allocations_bp
+from .finance import finance_bp
+from .activity_logs import activity_logs_bp  # ✅ Add this
+from .reset_password import reset_bp
+
+
+# Create a root blueprint
+base_bp = Blueprint("base", __name__)
+
+@base_bp.route("/")
+def index():
+    return {"message": "Asset Management API is live ✅"}
+
+def register_routes(app):
+    app.register_blueprint(base_bp)
+    app.register_blueprint(auth_bp, url_prefix="/api/auth")
+    app.register_blueprint(users_bp, url_prefix="/api/users")
+    app.register_blueprint(assets_bp, url_prefix="/api/assets")
+    app.register_blueprint(categories_bp, url_prefix="/api/categories")
+    app.register_blueprint(requests_bp, url_prefix="/api/requests")
+    app.register_blueprint(allocations_bp, url_prefix="/api/allocations")
+    app.register_blueprint(finance_bp, url_prefix="/api/finance")
+    app.register_blueprint(activity_logs_bp, url_prefix="/api")  # ✅ Register logs route
+    app.register_blueprint(reset_bp, url_prefix="/api/auth")
+

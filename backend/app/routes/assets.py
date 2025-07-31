@@ -1,194 +1,128 @@
 from flask import Blueprint, request, jsonify
-from flask_jwt_extended import jwt_required
-from app.decorators import role_required
-from app.models.asset import db, Asset
-from flasgger.utils import swag_from
+from flask_jwt_extended import jwt_required, get_jwt_identity
+from app.models.asset import Asset
+from app.models.user import User, UserRole
+from app.extensions import db
+from app.services.cloudinary_service import upload_image
+from app.utils.decorators import role_required
 
-assets_bp = Blueprint('assets', __name__, url_prefix='/assets')
+assets_bp = Blueprint("assets", __name__)
 
-
-@assets_bp.route('/', methods=['GET'])
-@swag_from({
-    "tags": ["Assets"],
-    "description": "Get all assets.",
-    "responses": {
-        200: {
-            "description": "List of all assets"
-        }
-    }
-})
+# ✅ Get all assets (Admin, Procurement, Finance see all; Employee sees only allocated)
+@assets_bp.route("/", methods=["GET"])
 @jwt_required()
 def get_assets():
-    assets = Asset.query.all()
-    return jsonify([asset.to_dict() for asset in assets]), 200
+    user = User.query.get(get_jwt_identity())
 
+    if user.role == UserRole.EMPLOYEE:
+        assets = [alloc.asset for alloc in user.allocations]
+    else:
+        assets = Asset.query.all()
 
-@assets_bp.route('/<int:id>', methods=['GET'])
-@swag_from({
-    "tags": ["Assets"],
-    "description": "Get a specific asset by ID.",
-    "parameters": [
+    return jsonify([
         {
-            "name": "id",
-            "in": "path",
-            "type": "integer",
-            "required": True,
-            "description": "Asset ID"
-        }
-    ],
-    "responses": {
-        200: {
-            "description": "Asset details"
-        },
-        404: {
-            "description": "Asset not found"
-        }
-    }
-})
-@jwt_required()
-def get_asset(id):
-    asset = Asset.query.get_or_404(id)
-    return jsonify(asset.to_dict()), 200
+            "id": a.id,
+            "name": a.name,
+            "image_url": a.image_url,
+            "description": a.description,
+            "brand": a.brand,
+            "model_number": a.model_number,
+            "serial_number": a.serial_number,
+            "condition": a.condition,
+            "status": a.status,
+            "category_id": a.category_id
+        } for a in assets
+    ]), 200
 
 
-@assets_bp.route('/', methods=['POST'])
-@swag_from({
-    "tags": ["Assets"],
-    "description": "Create a new asset record.",
-    "parameters": [
-        {
-            "name": "body",
-            "in": "body",
-            "required": True,
-            "schema": {
-                "type": "object",
-                "properties": {
-                    "name": {"type": "string"},
-                    "description": {"type": "string"},
-                    "quantity": {"type": "integer"},
-                    "category_id": {"type": "integer"},
-                    "image_url": {"type": "string"}
-                },
-                "required": ["name", "category_id"]
-            }
-        }
-    ],
-    "responses": {
-        201: {
-            "description": "Asset created successfully"
-        },
-        400: {
-            "description": "Missing required fields"
-        }
-    }
-})
+# ✅ Get specific asset by ID
+@assets_bp.route("/<int:asset_id>", methods=["GET"])
 @jwt_required()
-@role_required('Admin')
+def get_asset(asset_id):
+    asset = Asset.query.get(asset_id)
+    if not asset:
+        return jsonify({"error": "Asset not found"}), 404
+
+    return jsonify({
+        "id": asset.id,
+        "name": asset.name,
+        "image_url": asset.image_url,
+        "description": asset.description,
+        "brand": asset.brand,
+        "model_number": asset.model_number,
+        "serial_number": asset.serial_number,
+        "condition": asset.condition,
+        "status": asset.status,
+        "category_id": asset.category_id
+    }), 200
+
+
+# ✅ Create asset (Admin & Procurement only)
+@assets_bp.route("/", methods=["POST"])
+@jwt_required()
+@role_required("Admin", "Procurement")
 def create_asset():
-    data = request.get_json()
+    data = request.form.to_dict()
+    file = request.files.get("image")
 
-    name = data.get('name')
-    description = data.get('description', '')
-    quantity = data.get('quantity', 1)
-    category_id = data.get('category_id')
-    image_url = data.get('image_url', None)
+    required_fields = ("name", "category_id")
+    if not all(field in data for field in required_fields):
+        return jsonify({"error": "Missing required fields"}), 400
 
-    if not name or not category_id:
-        return jsonify({"error": "Missing required fields: name and category_id"}), 400
+    try:
+        image_url = upload_image(file) if file else None
 
-    new_asset = Asset(
-        name=name,
-        description=description,
-        quantity=quantity,
-        category_id=category_id,
-        image_url=image_url,
-    )
+        new_asset = Asset(
+            name=data["name"],
+            description=data.get("description"),
+            image_url=image_url,
+            brand=data.get("brand"),
+            model_number=data.get("model_number"),
+            serial_number=data.get("serial_number"),
+            condition=data.get("condition"),
+            category_id=int(data["category_id"]),
+            created_by=get_jwt_identity()
+        )
 
-    db.session.add(new_asset)
-    db.session.commit()
+        db.session.add(new_asset)
+        db.session.commit()
+        return jsonify({"message": "Asset created successfully"}), 201
 
-    return jsonify(new_asset.to_dict()), 201
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
 
 
-@assets_bp.route('/<int:id>', methods=['PATCH'])
-@swag_from({
-    "tags": ["Assets"],
-    "description": "Update an existing asset by ID.",
-    "parameters": [
-        {
-            "name": "id",
-            "in": "path",
-            "type": "integer",
-            "required": True,
-            "description": "Asset ID"
-        },
-        {
-            "name": "body",
-            "in": "body",
-            "required": True,
-            "schema": {
-                "type": "object",
-                "properties": {
-                    "name": {"type": "string"},
-                    "description": {"type": "string"},
-                    "quantity": {"type": "integer"},
-                    "category_id": {"type": "integer"},
-                    "image_url": {"type": "string"}
-                }
-            }
-        }
-    ],
-    "responses": {
-        200: {
-            "description": "Asset updated successfully"
-        },
-        404: {
-            "description": "Asset not found"
-        }
-    }
-})
+# ✅ Update asset (Admin & Procurement)
+@assets_bp.route("/<int:asset_id>", methods=["PUT"])
 @jwt_required()
-@role_required('Admin')
-def update_asset(id):
-    asset = Asset.query.get_or_404(id)
-    data = request.get_json()
+@role_required("Admin", "Procurement")
+def update_asset(asset_id):
+    asset = Asset.query.get(asset_id)
+    if not asset:
+        return jsonify({"error": "Asset not found"}), 404
 
-    asset.name = data.get('name', asset.name)
-    asset.description = data.get('description', asset.description)
-    asset.quantity = data.get('quantity', asset.quantity)
-    asset.category_id = data.get('category_id', asset.category_id)
-    asset.image_url = data.get('image_url', asset.image_url)
+    data = request.json
+    for field in [
+        "name", "description", "brand", "model_number", "serial_number",
+        "condition", "status", "category_id"
+    ]:
+        if field in data:
+            setattr(asset, field, data[field])
 
     db.session.commit()
-    return jsonify(asset.to_dict()), 200
+    return jsonify({"message": "Asset updated successfully"}), 200
 
 
-@assets_bp.route('/<int:id>', methods=['DELETE'])
-@swag_from({
-    "tags": ["Assets"],
-    "description": "Delete an asset by ID.",
-    "parameters": [
-        {
-            "name": "id",
-            "in": "path",
-            "type": "integer",
-            "required": True,
-            "description": "Asset ID"
-        }
-    ],
-    "responses": {
-        200: {
-            "description": "Asset deleted successfully"
-        },
-        404: {
-            "description": "Asset not found"
-        }
-    }
-})
+# ✅ Delete asset (Admin & Procurement)
+@assets_bp.route("/<int:asset_id>", methods=["DELETE"])
 @jwt_required()
-@role_required('Admin')
-def delete_asset(id):
-    asset = Asset.query.get_or_404(id)
+@role_required("Admin", "Procurement")
+def delete_asset(asset_id):
+    asset = Asset.query.get(asset_id)
+    if not asset:
+        return jsonify({"error": "Asset not found"}), 404
+
     db.session.delete(asset)
     db.session.commit()
-    return jsonify({"message": "Asset deleted"}), 200
+    return jsonify({"message": "Asset deleted successfully"}), 200

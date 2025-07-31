@@ -1,49 +1,67 @@
-from app.models import db, allocation
-from datetime import datetime
+from datetime import datetime, timezone
+from app.extensions import db
 from enum import Enum
-from sqlalchemy import Enum as SqlEnum
-from .serializer_mixin import SerializerMixin
-
-
-class RequestType(Enum):
-    NEWASSET = "New Asset"
-    REPAIR = "Repair"
-
-
-class RequestUrgency(Enum):
-    LOW = "low"
-    MEDIUM = "medium"
-    HIGH = "high"
 
 
 class RequestStatus(Enum):
-    PENDING = "pending"
-    APPROVED = "approved"
-    REJECTED = "rejected"
-    FULFILLED = "fulfilled"
+    PENDING = "Pending"
+    APPROVED = "Approved"
+    REJECTED = "Rejected"
+    FULFILLED = "Fulfilled"
 
 
-class Request(db.Model, SerializerMixin):
-    __tablename__ = 'requests'
+class RequestType(Enum):
+    NEW = "New"
+    REPLACEMENT = "Replacement"
+    REPAIR = "Repair"
+
+
+class UrgencyLevel(Enum):
+    LOW = "Low"
+    MEDIUM = "Medium"
+    HIGH = "High"
+
+
+class Request(db.Model):
+    __tablename__ = "requests"
 
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    asset_name = db.Column(db.String(100), nullable=False)
-    type = db.Column(SqlEnum(RequestType),
-                     default=RequestType.NEWASSET, nullable=False)
-    reason = db.Column(db.Text, nullable=False)
-    urgency = db.Column(SqlEnum(RequestUrgency),
-                        default=RequestUrgency.LOW, nullable=False)
-    status = db.Column(SqlEnum(RequestStatus),
-                       default=RequestStatus.PENDING, nullable=False)
-    requested_at = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at = db.Column(
-        db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
+    asset_id = db.Column(db.Integer, db.ForeignKey("assets.id"), nullable=True)
+    category_id = db.Column(db.Integer, db.ForeignKey("categories.id"), nullable=True)
 
-    user = db.relationship("User", back_populates="requests")
+    # Request Details
+    request_type = db.Column(db.String(50), default=RequestType.NEW.value)
+    urgency = db.Column(db.String(50), default=UrgencyLevel.MEDIUM.value)
+    status = db.Column(db.String(50), default=RequestStatus.PENDING.value)
 
-    allocations = db.relationship(
-        "Allocation", back_populates="request", lazy='dynamic')
+    reason = db.Column(db.Text, nullable=False)  # High-level summary of need
+    justification = db.Column(db.Text)  # Business case
+    estimated_cost = db.Column(db.Float, nullable=True)
 
-    def __repr__(self):
-        return f"<Request by User {self.user_id} for '{self.asset_name}' - {self.status}>"
+    # Asset details (for NEW/REPLACEMENT)
+    asset_name = db.Column(db.String(100), nullable=True)
+    asset_description = db.Column(db.Text, nullable=True)
+    brand = db.Column(db.String(100), nullable=True)
+
+    # Repair-specific
+    issue_description = db.Column(db.Text, nullable=True)
+
+    # Timestamps
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+    approved_at = db.Column(db.DateTime, nullable=True)
+    fulfilled_at = db.Column(db.DateTime, nullable=True)
+
+    # Approvals
+    approved_by = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True)
+    finance_approved = db.Column(db.Boolean, default=False)
+
+    # Rejection comment
+    rejection_comment = db.Column(db.Text, nullable=True)
+
+    # Relationships
+    user = db.relationship("User", back_populates="requests", foreign_keys=[user_id])
+    approved_by_user = db.relationship("User", foreign_keys=[approved_by])
+
+
+
