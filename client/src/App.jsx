@@ -15,6 +15,7 @@ import RequestsTable from './components/RequestsTable';
 import UserManagement from './components/UserManagement';
 import AddUser from './components/AddUser';
 import Settings from './components/Settings';
+import Login from './components/Login';
 
 function PrivateRoute({ children, allowedRoles = [] }) {
   const { token, user } = useSelector((state) => state.auth);
