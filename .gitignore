@@ -46,3 +46,4 @@ htmlcov/
 backend/.env
 
 node_modules
+# Git ignore formatting
