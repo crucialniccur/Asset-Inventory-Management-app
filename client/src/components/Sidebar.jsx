@@ -95,3 +95,4 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
 };
 
 export default Sidebar;
+// Sidebar navigation component
