@@ -125,3 +125,4 @@ def test_invalid_status_update(client, auth):
     response = client.patch(f"/requests/{request_id}", json={"status": "not-a-status"})
     assert response.status_code == 400
     assert "status" in response.get_json()["errors"]
+# Requests test formatting
