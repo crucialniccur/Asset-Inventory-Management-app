@@ -37,3 +37,4 @@ export const getWithAuth = async (endpoint) => {
   });
   return res.json();
 };
+// API helper functions
