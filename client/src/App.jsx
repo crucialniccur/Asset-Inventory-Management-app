@@ -1,26 +1,137 @@
 // src/App.jsx
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/Registerpages';
+import Dashboard from './components/Dashboard';
+import Sidebar from './components/Sidebar';
+import AssetList from './components/AssetList';
+import AssetDetail from './components/AssetDetail';
+import AddAssetForm from './components/AddAssetForm';
+import AssetAllocation from './components/AssetAllocation';
+import RequestForm from './components/RequestForm';
+import RequestsTable from './components/RequestsTable';
+import UserManagement from './components/UserManagement';
+import Settings from './components/Settings';
 
+function PrivateRoute({ children, allowedRoles = [] }) {
+  const { token, user } = useSelector((state) => state.auth);
+  
+  if (!token) {
+    return <Navigate to="/login" />;
+  }
+  
+  if (allowedRoles.length > 0 && user && !allowedRoles.includes(user.role)) {
+    return <Navigate to="/dashboard" />;
+  }
+  
+  return children;
+}
 
-function PrivateRoute({ children }) {
-  const token = useSelector((state) => state.auth.token);
-  return token ? children : <Navigate to="/register" />;
+function AppLayout({ children }) {
+  return (
+    <div className="d-flex">
+      <Sidebar />
+      <main className="flex-grow-1" style={{ minHeight: '100vh', backgroundColor: '#f8f9fa' }}>
+        {children}
+      </main>
+    </div>
+  );
 }
 
 function App() {
-  const token = useSelector((state) => state.auth.token);
+  const { token, user } = useSelector((state) => state.auth);
 
   return (
     <Router>
-      <Routes>
-        <Route path="/" element={<Navigate to="/register" />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
-      </Routes>
+      <div className="App">
+        <Routes>
+          {/* Public routes */}
+          <Route path="/login" element={token ? <Navigate to="/dashboard" /> : <LoginPage />} />
+          <Route path="/register" element={token ? <Navigate to="/dashboard" /> : <RegisterPage />} />
+          
+          {/* Protected routes */}
+          <Route path="/dashboard" element={
+            <PrivateRoute>
+              <AppLayout>
+                <Dashboard />
+              </AppLayout>
+            </PrivateRoute>
+          } />
+          
+          {/* Asset management routes */}
+          <Route path="/assets" element={
+            <PrivateRoute>
+              <AppLayout>
+                <AssetList />
+              </AppLayout>
+            </PrivateRoute>
+          } />
+          
+          <Route path="/assets/:id" element={
+            <PrivateRoute>
+              <AppLayout>
+                <AssetDetail />
+              </AppLayout>
+            </PrivateRoute>
+          } />
+          
+          <Route path="/assets/add" element={
+            <PrivateRoute allowedRoles={['Admin', 'Procurement']}>
+              <AppLayout>
+                <AddAssetForm />
+              </AppLayout>
+            </PrivateRoute>
+          } />
+          
+          <Route path="/allocation" element={
+            <PrivateRoute allowedRoles={['Admin', 'Procurement']}>
+              <AppLayout>
+                <AssetAllocation />
+              </AppLayout>
+            </PrivateRoute>
+          } />
+          
+          {/* Request routes */}
+          <Route path="/requests" element={
+            <PrivateRoute>
+              <AppLayout>
+                <RequestsTable />
+              </AppLayout>
+            </PrivateRoute>
+          } />
+          
+          <Route path="/requests/new" element={
+            <PrivateRoute allowedRoles={['Employee']}>
+              <AppLayout>
+                <RequestForm />
+              </AppLayout>
+            </PrivateRoute>
+          } />
+          
+          {/* Admin routes */}
+          <Route path="/users" element={
+            <PrivateRoute allowedRoles={['Admin']}>
+              <AppLayout>
+                <UserManagement />
+              </AppLayout>
+            </PrivateRoute>
+          } />
+          
+          <Route path="/settings" element={
+            <PrivateRoute>
+              <AppLayout>
+                <Settings />
+              </AppLayout>
+            </PrivateRoute>
+          } />
+          
+          {/* Default redirect */}
+          <Route path="/" element={<Navigate to={token ? "/dashboard" : "/login"} />} />
+          <Route path="*" element={<Navigate to={token ? "/dashboard" : "/login"} />} />
+        </Routes>
+      </div>
     </Router>
   );
 }

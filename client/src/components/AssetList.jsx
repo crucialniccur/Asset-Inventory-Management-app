@@ -1,79 +1,25 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Package, Search, Filter, Plus, Edit, Trash2, Eye } from 'lucide-react';
+import { useSelector, useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import { fetchAssets, deleteAsset } from '../redux/slices/assetsSlice';
 
-const AssetList = ({ onNavigateToAddAsset }) => {
-  const { user } = useAuth();
-  const [assets, setAssets] = useState([]);
+const AssetList = () => {
+  const { user } = useSelector((state) => state.auth);
+  const { assets, loading, error } = useSelector((state) => state.assets);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Replace this with real API fetch in production
-    const mockAssets = [
-      {
-        id: 1,
-        name: 'Dell Laptop XPS 13',
-        category: 'Electronics',
-        description: 'High-performance laptop for development work',
-        quantity: 5,
-        status: 'available',
-        created_at: '2024-01-14'
-      },
-      {
-        id: 2,
-        name: 'Office Chair Ergonomic',
-        category: 'Furniture',
-        description: 'Comfortable office chair with lumbar support',
-        quantity: 12,
-        status: 'allocated',
-        created_at: '2024-01-09'
-      },
-      {
-        id: 3,
-        name: 'HP Printer LaserJet',
-        category: 'Electronics',
-        description: 'Black and white laser printer for office use',
-        quantity: 2,
-        status: 'maintenance',
-        created_at: '2024-01-07'
-      },
-      {
-        id: 4,
-        name: 'Standing Desk',
-        category: 'Furniture',
-        description: 'Adjustable height standing desk',
-        quantity: 8,
-        status: 'available',
-        created_at: '2024-01-04'
-      },
-      {
-        id: 5,
-        name: 'MacBook Pro 16"',
-        category: 'Electronics',
-        description: 'Apple MacBook Pro for creative work',
-        quantity: 3,
-        status: 'allocated',
-        created_at: '2024-01-02'
-      }
-    ];
-    setTimeout(() => {
-      setAssets(mockAssets);
-      setIsLoading(false);
-    }, 1000);
-  }, []);
+    dispatch(fetchAssets());
+  }, [dispatch]);
 
   const filteredAssets = assets.filter(asset => {
     const matchesSearch =
       asset.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      asset.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      asset.description.toLowerCase().includes(searchTerm.toLowerCase());
+      asset.description?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === 'all' || asset.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
@@ -81,143 +27,168 @@ const AssetList = ({ onNavigateToAddAsset }) => {
   const getStatusBadge = (status) => {
     switch (status) {
       case 'available':
-        return <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">Available</Badge>;
+        return <span className="badge bg-success">Available</span>;
       case 'allocated':
-        return <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300">Allocated</Badge>;
+        return <span className="badge bg-primary">Allocated</span>;
       case 'maintenance':
-        return <Badge className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300">Maintenance</Badge>;
+        return <span className="badge bg-warning">Maintenance</span>;
       default:
-        return <Badge variant="secondary">Unknown</Badge>;
+        return <span className="badge bg-secondary">Unknown</span>;
+    }
+  };
+
+  const handleDelete = (id) => {
+    if (window.confirm('Are you sure you want to delete this asset?')) {
+      dispatch(deleteAsset(id));
     }
   };
 
   const canEditAssets = user?.role === 'Admin' || user?.role === 'Procurement';
 
-  if (isLoading) {
+  if (loading) {
     return (
-      <div className="p-6">
-        <div className="space-y-4">
-          {[...Array(5)].map((_, i) => (
-            <Card key={i} className="animate-pulse">
-              <CardContent className="p-6">
-                <div className="h-4 bg-muted rounded w-3/4 mb-2" />
-                <div className="h-3 bg-muted rounded w-1/2" />
-              </CardContent>
-            </Card>
-          ))}
+      <div className="p-4">
+        <div className="d-flex justify-content-center">
+          <div className="spinner-border" role="status">
+            <span className="visually-hidden">Loading...</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-4">
+        <div className="alert alert-danger" role="alert">
+          {error}
         </div>
       </div>
     );
   }
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex flex-col space-y-4 md:flex-row md:items-center md:justify-between md:space-y-0">
+    <div className="p-4">
+      {/* Header */}
+      <div className="d-flex justify-content-between align-items-center mb-4">
         <div>
-          <h1 className="text-3xl font-bold">Assets</h1>
-          <p className="text-muted-foreground">Manage your inventory assets</p>
+          <h2 className="mb-1">Assets</h2>
+          <p className="text-muted mb-0">Manage your asset inventory</p>
         </div>
         {canEditAssets && (
-          <Button
-            className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-semibold shadow-md hover:opacity-90 transition-all"
-            onClick={onNavigateToAddAsset}
+          <button 
+            className="btn btn-primary"
+            onClick={() => navigate('/assets/add')}
           >
-            <Plus className="h-4 w-4 mr-2" />
+            <i className="bi bi-plus-circle me-2"></i>
             Add Asset
-          </Button>
-
+          </button>
         )}
       </div>
 
-      <Card className="shadow-soft">
-        <CardContent className="p-6">
-          <div className="flex flex-col space-y-4 md:flex-row md:items-center md:space-y-0 md:space-x-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search assets..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-[180px]">
-                <Filter className="h-4 w-4 mr-2" />
-                <SelectValue placeholder="Filter by status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="available">Available</SelectItem>
-                <SelectItem value="allocated">Allocated</SelectItem>
-                <SelectItem value="maintenance">Maintenance</SelectItem>
-              </SelectContent>
-            </Select>
+      {/* Filters */}
+      <div className="row mb-4">
+        <div className="col-md-6">
+          <div className="input-group">
+            <span className="input-group-text">
+              <i className="bi bi-search"></i>
+            </span>
+            <input
+              type="text"
+              className="form-control"
+              placeholder="Search assets..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
           </div>
-        </CardContent>
-      </Card>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredAssets.map((asset) => (
-          <Card key={asset.id} className="card-interactive shadow-soft">
-            <CardHeader>
-              <div className="flex items-start justify-between">
-                <div className="flex items-center space-x-2">
-                  <Package className="h-5 w-5 text-primary" />
-                  <CardTitle className="text-lg">{asset.name}</CardTitle>
-                </div>
-                {getStatusBadge(asset.status)}
-              </div>
-              <CardDescription className="text-sm">{asset.category}</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{asset.description}</p>
-              <div className="flex items-center justify-between mb-4">
-                <span className="text-sm font-medium">Quantity: {asset.quantity}</span>
-                <span className="text-xs text-muted-foreground">
-                  Added {new Date(asset.created_at).toLocaleDateString()}
-                </span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Button variant="outline" size="sm" className="flex-1">
-                  <Eye className="h-3 w-3 mr-1" />
-                  View
-                </Button>
-                {canEditAssets && (
-                  <>
-                    <Button variant="outline" size="sm">
-                      <Edit className="h-3 w-3" />
-                    </Button>
-                    <Button variant="outline" size="sm" className="text-destructive hover:text-destructive">
-                      <Trash2 className="h-3 w-3" />
-                    </Button>
-                  </>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+        </div>
+        <div className="col-md-3">
+          <select
+            className="form-select"
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+          >
+            <option value="all">All Status</option>
+            <option value="available">Available</option>
+            <option value="allocated">Allocated</option>
+            <option value="maintenance">Maintenance</option>
+          </select>
+        </div>
       </div>
 
-      {filteredAssets.length === 0 && (
-        <Card className="shadow-soft">
-          <CardContent className="p-12 text-center">
-            <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-medium mb-2">No assets found</h3>
-            <p className="text-muted-foreground mb-4">
-              {searchTerm || statusFilter !== 'all'
-                ? 'Try adjusting your search or filter criteria.'
-                : 'Get started by adding your first asset.'}
-            </p>
-            {canEditAssets && (
-              <Button className="bg-gradient-primary hover:opacity-90" onClick={onNavigateToAddAsset}>
-                <Plus className="h-4 w-4 mr-2" />
-                Add Your First Asset
-              </Button>
-            )}
-          </CardContent>
-        </Card>
-      )}
+      {/* Assets Grid */}
+      <div className="row">
+        {filteredAssets.length === 0 ? (
+          <div className="col-12">
+            <div className="text-center py-5">
+              <i className="bi bi-box display-1 text-muted"></i>
+              <h4 className="mt-3">No assets found</h4>
+              <p className="text-muted">Try adjusting your search or filters</p>
+            </div>
+          </div>
+        ) : (
+          filteredAssets.map((asset) => (
+            <div key={asset.id} className="col-md-6 col-lg-4 mb-4">
+              <div className="card h-100">
+                {asset.image_url && (
+                  <img 
+                    src={asset.image_url} 
+                    className="card-img-top" 
+                    alt={asset.name}
+                    style={{ height: '200px', objectFit: 'cover' }}
+                  />
+                )}
+                <div className="card-body">
+                  <div className="d-flex justify-content-between align-items-start mb-2">
+                    <h5 className="card-title mb-0">{asset.name}</h5>
+                    {getStatusBadge(asset.status)}
+                  </div>
+                  <p className="card-text text-muted small mb-2">
+                    {asset.description || 'No description available'}
+                  </p>
+                  <div className="d-flex justify-content-between align-items-center">
+                    <span className="text-muted">
+                      Quantity: {asset.quantity}
+                    </span>
+                    <small className="text-muted">
+                      {new Date(asset.created_at).toLocaleDateString()}
+                    </small>
+                  </div>
+                </div>
+                <div className="card-footer bg-transparent">
+                  <div className="d-flex gap-2">
+                    <button
+                      className="btn btn-outline-primary btn-sm"
+                      onClick={() => navigate(`/assets/${asset.id}`)}
+                    >
+                      <i className="bi bi-eye me-1"></i>
+                      View
+                    </button>
+                    {canEditAssets && (
+                      <>
+                        <button
+                          className="btn btn-outline-secondary btn-sm"
+                          onClick={() => navigate(`/assets/${asset.id}/edit`)}
+                        >
+                          <i className="bi bi-pencil me-1"></i>
+                          Edit
+                        </button>
+                        <button
+                          className="btn btn-outline-danger btn-sm"
+                          onClick={() => handleDelete(asset.id)}
+                        >
+                          <i className="bi bi-trash me-1"></i>
+                          Delete
+                        </button>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
     </div>
   );
 };

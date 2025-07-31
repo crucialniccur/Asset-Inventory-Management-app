@@ -20,11 +20,22 @@ export const loginUser = createAsyncThunk(
   'auth/loginUser',
   async (credentials, { rejectWithValue }) => {
     try {
-      const res = await api.post('/login', credentials);
-      return res.data;
+      const res = await api.post('/auth/login', credentials);
+      const token = res.data.access_token;
+      
+      // Set the token in headers for subsequent requests
+      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      
+      // Fetch user data
+      const userRes = await api.get('/auth/me');
+      
+      return {
+        user: userRes.data,
+        token: token
+      };
     } catch (err) {
       return rejectWithValue(
-        err.response?.data?.message || err.message || 'Login failed'
+        err.response?.data?.error || err.message || 'Login failed'
       );
     }
   }
@@ -35,11 +46,14 @@ export const registerUser = createAsyncThunk(
   'auth/registerUser',
   async (credentials, { rejectWithValue }) => {
     try {
-      const res = await api.post('/register', credentials);
-      return res.data;
+      const res = await api.post('/auth/register', credentials);
+      return {
+        user: res.data,
+        token: res.data.access_token || null
+      };
     } catch (err) {
       return rejectWithValue(
-        err.response?.data?.message || err.message || 'Registration failed'
+        err.response?.data?.error || err.message || 'Registration failed'
       );
     }
   }

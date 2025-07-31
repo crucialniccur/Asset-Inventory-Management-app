@@ -22,7 +22,7 @@ export default function RegisterPage() {
       name: Yup.string().required('Name is required'),
       email: Yup.string().email('Invalid email').required('Email is required'),
       password: Yup.string().min(6, 'Must be at least 6 characters').required('Password is required'),
-      role: Yup.string().oneOf(['employee', 'admin', 'procurement_manager'], 'Invalid role'),
+      role: Yup.string().oneOf(['employee', 'admin', 'procurement', 'finance'], 'Invalid role'),
     }),
     onSubmit: async (values) => {
       try {
@@ -111,7 +111,8 @@ export default function RegisterPage() {
               >
                 <option value="employee">Employee</option>
                 <option value="admin">Admin</option>
-                <option value="procurement_manager">Procurement Manager</option>
+                <option value="procurement">Procurement Manager</option>
+                <option value="finance">Finance</option>
               </select>
             </div>
             {formik.errors.role && <div className="text-danger small">{formik.errors.role}</div>}
