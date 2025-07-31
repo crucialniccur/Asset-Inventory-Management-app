@@ -9,3 +9,4 @@ class Config:
     JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "super-jwt-secret-key")
     JWT_TOKEN_LOCATION = ["headers"]
     DEBUG = True
+# Config settings
