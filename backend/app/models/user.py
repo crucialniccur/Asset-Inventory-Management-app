@@ -49,3 +49,4 @@ class User(db.Model):
             "role": self.role.value,
             "created_at": self.created_at.isoformat() if self.created_at else None
         }
+# User model
