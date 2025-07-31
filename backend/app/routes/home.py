@@ -22,3 +22,4 @@ home_bp = Blueprint('home', __name__)
 })
 def home():
     return jsonify({"message": "Welcome to the Asset Inventory Management API"})
+# Home route description
