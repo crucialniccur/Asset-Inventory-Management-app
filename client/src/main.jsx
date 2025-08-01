@@ -14,4 +14,3 @@ createRoot(document.getElementById('root')).render(
     </Provider>
   </StrictMode>
 );
-# Final formatting update
