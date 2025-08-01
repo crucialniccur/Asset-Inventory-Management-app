@@ -2,7 +2,7 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
 import * as React from "react";
 import * as RadioGroupPrimitive from "@radix-ui/react-radio-group";
 import { Circle } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "../../lib/utils";
 const RadioGroup = /*#__PURE__*/React.forwardRef(({
   className,
   ...props

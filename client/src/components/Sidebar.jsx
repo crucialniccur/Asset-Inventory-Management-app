@@ -1,128 +1,105 @@
 import React from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useAuth } from '../contexts/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { logout } from '../redux/slices/authslice';
+import { cn } from '../lib/utils';
+import { Button } from '../components/ui/button';
+import {
+  Building2, Home, Package, Users,
+  FileText, Settings, LogOut, UserCheck, PlusCircle
+} from 'lucide-react';
+
 
 const Sidebar = () => {
-  const { user } = useSelector((state) => state.auth);
-  const dispatch = useDispatch();
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
-  const handleLogout = () => {
-    dispatch(logout());
-    navigate('/login');
-  };
-
   const menuItems = [
-    { 
-      id: 'dashboard', 
-      label: 'Dashboard', 
-      icon: 'bi-house', 
-      path: '/dashboard',
-      roles: ['Admin', 'Procurement', 'Finance', 'Employee'] 
-    },
-    { 
-      id: 'assets', 
-      label: 'Assets', 
-      icon: 'bi-box', 
-      path: '/assets',
-      roles: ['Admin', 'Procurement', 'Finance', 'Employee'] 
-    },
-    { 
-      id: 'requests', 
-      label: 'Requests', 
-      icon: 'bi-file-text', 
-      path: '/requests',
-      roles: ['Admin', 'Procurement', 'Finance', 'Employee'] 
-    },
-    { 
-      id: 'allocation', 
-      label: 'Allocations', 
-      icon: 'bi-person-check', 
-      path: '/allocation',
-      roles: ['Admin', 'Procurement'] 
-    },
-    { 
-      id: 'add-asset', 
-      label: 'Add Asset', 
-      icon: 'bi-plus-circle', 
-      path: '/assets/add',
-      roles: ['Admin', 'Procurement'] 
-    },
-    { 
-      id: 'users', 
-      label: 'Users', 
-      icon: 'bi-people', 
-      path: '/users',
-      roles: ['Admin'] 
-    }
+    { id: 'dashboard', label: 'Dashboard', icon: Home, path: '/dashboard', roles: ['Admin', 'Procurement', 'Finance', 'Employee'] },
+    { id: 'assets', label: 'Assets', icon: Package, path: '/assets', roles: ['Admin', 'Procurement', 'Finance', 'Employee'] },
+    { id: 'requests', label: 'Requests', icon: FileText, path: '/requests', roles: ['Admin', 'Procurement', 'Finance', 'Employee'] },
+    { id: 'allocations', label: 'Allocations', icon: UserCheck, path: '/allocations', roles: ['Admin', 'Procurement', 'Finance'] },
+    { id: 'users', label: 'Users', icon: Users, path: '/users', roles: ['Admin'] },
+    { id: 'add-asset', label: 'Add Asset', icon: PlusCircle, path: '/assets/add', roles: ['Admin', 'Procurement'] }
   ];
 
   const filteredMenuItems = menuItems.filter(item =>
     item.roles.includes(user?.role || 'Employee')
   );
 
-  const isActive = (path) => location.pathname === path;
+  const isActive = (path) => {
+    if (path === '/dashboard') {
+      return location.pathname === '/' || location.pathname === '/dashboard';
+    }
+    return location.pathname.startsWith(path);
+  };
 
   return (
-    <div className="bg-dark text-white" style={{ width: '250px', minHeight: '100vh' }}>
+     <div className="w-64 h-screen bg-[#1f2937] text-white border-r border-[#374151] flex flex-col">
       {/* Header */}
-      <div className="p-3 border-bottom border-secondary">
-        <div className="d-flex align-items-center">
-          <div className="bg-primary rounded p-2 me-2">
-            <i className="bi bi-building text-white"></i>
+      <div className="p-6 border-b border-[#374151]">
+        <div className="flex items-center space-x-3">
+          <div className="w-10 h-10 bg-[#3b82f6] rounded-lg flex items-center justify-center">
+            <Building2 className="h-6 w-6 text-white" />
           </div>
           <div>
-            <h6 className="mb-0 text-white">Asset Manager</h6>
-            <small className="text-muted">Inventory System</small>
+            <h1 className="text-lg font-semibold text-white">Asset Manager</h1>
+            <p className="text-xs text-gray-300">Inventory System</p>
           </div>
         </div>
       </div>
 
       {/* User Info */}
-      <div className="p-3 border-bottom border-secondary">
-        <div className="bg-secondary rounded p-2">
-          <p className="mb-1 fw-bold text-white">{user?.name}</p>
-          <p className="mb-1 small text-light">{user?.role}</p>
-          <p className="mb-0 small text-muted">{user?.email}</p>
+      <div className="p-4 border-b border-[#374151]">
+        <div className="bg-[#111827] rounded-lg p-3">
+          <p className="font-medium text-gray-100 text-sm">{user?.name}</p>
+          <p className="text-xs text-gray-400">{user?.role}</p>
+          <p className="text-xs text-gray-500">{user?.email}</p>
         </div>
       </div>
 
       {/* Navigation */}
-      <nav className="p-2">
-        {filteredMenuItems.map(item => (
-          <button
-            key={item.id}
-            className={`btn w-100 text-start mb-1 ${
-              isActive(item.path) 
-                ? 'btn-primary' 
-                : 'btn-outline-light'
-            }`}
-            onClick={() => navigate(item.path)}
-          >
-            <i className={`bi ${item.icon} me-2`}></i>
-            {item.label}
-          </button>
-        ))}
+      <nav className="flex-1 p-4 space-y-2">
+        {filteredMenuItems.map(item => {
+          const Icon = item.icon;
+          const isActive = activeTab === item.id;
+          return (
+            <Button
+              key={item.id}
+              variant="ghost"
+              onClick={() => setActiveTab(item.id)}
+              className={cn(
+                "w-full justify-start space-x-3 h-10 rounded-md transition text-white",
+                isActive
+                  ? "bg-[#111827] border border-[#2563eb]"
+                  : "hover:bg-[#111827] hover:text-white"
+              )}
+            >
+              <Icon className="h-4 w-4" />
+              <span>{item.label}</span>
+            </Button>
+          );
+        })}
       </nav>
 
       {/* Bottom Controls */}
-      <div className="p-3 border-top border-secondary mt-auto">
-        <button
-          className="btn btn-outline-light w-100 mb-2"
-          onClick={() => navigate('/settings')}
+      <div className="p-4 border-t border-[#374151] space-y-2">
+        <Button
+          variant="ghost"
+          onClick={() => setActiveTab('settings')}
+          className="w-full justify-start space-x-3 h-10 text-white hover:bg-[#111827]"
         >
-          <i className="bi bi-gear me-2"></i>
-          Settings
-        </button>
-        <button
-          className="btn btn-outline-danger w-100"
-          onClick={handleLogout}
+          <Settings className="h-4 w-4" />
+          <span>Settings</span>
+        </Button>
+        <Button
+          variant="ghost"
+          onClick={logout}
+          className="w-full justify-start space-x-3 h-10 text-white hover:bg-red-600 hover:text-white"
         >
-          <i className="bi bi-box-arrow-right me-2"></i>
-          Sign out
-        </button>
+          <LogOut className="h-4 w-4" />
+          <span>Sign out</span>
+        </Button>
       </div>
     </div>
   );

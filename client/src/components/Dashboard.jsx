@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { useSelector } from 'react-redux';
+import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
+import { Button } from '../components/ui/button';
+import { Package, Users, FileText, AlertTriangle, TrendingUp, Clock } from 'lucide-react';
 
 const Dashboard = () => {
-  const { user } = useSelector((state) => state.auth);
+  const { user } = useAuth();
   const navigate = useNavigate();
 
   const [stats, setStats] = useState({
@@ -16,21 +19,30 @@ const Dashboard = () => {
   });
 
   useEffect(() => {
-    // You will replace this with a real fetch later
-    setStats({
-      totalAssets: 156,
-      availableAssets: 98,
-      allocatedAssets: 58,
-      pendingRequests: 12,
-      totalUsers: 24,
-      recentActivity: [
-        { id: 1, type: 'allocation', description: 'Laptop allocated to John Doe', time: '2 minutes ago' },
-        { id: 2, type: 'request', description: 'New asset request for printer', time: '1 hour ago' },
-        { id: 3, type: 'asset', description: 'New desktop computer added', time: '3 hours ago' },
-        { id: 4, type: 'return', description: 'Monitor returned by Jane Smith', time: '5 hours ago' },
-      ],
-    });
+    const fetchDashboardStats = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/api/dashboard', {
+          method: 'GET',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+  
+        if (!response.ok) {
+          throw new Error(`Failed to fetch dashboard data: ${response.status}`);
+        }
+  
+        const data = await response.json();
+        setStats(data);
+      } catch (error) {
+        console.error('Error fetching dashboard stats:', error);
+      }
+    };
+  
+    fetchDashboardStats();
   }, []);
+  
 
   const getGreeting = () => {
     const hour = new Date().getHours();
@@ -43,161 +55,158 @@ const Dashboard = () => {
     {
       title: 'Total Assets',
       value: stats.totalAssets,
-      icon: 'bi-box',
+      icon: Package,
       description: 'All assets in inventory',
       color: 'text-primary',
-      bgColor: 'bg-primary',
+      bgColor: 'bg-primary/10',
     },
     {
       title: 'Available',
       value: stats.availableAssets,
-      icon: 'bi-check-circle',
+      icon: TrendingUp,
       description: 'Ready for allocation',
-      color: 'text-success',
-      bgColor: 'bg-success',
+      color: 'text-green-600',
+      bgColor: 'bg-green-100',
     },
     {
       title: 'Allocated',
       value: stats.allocatedAssets,
-      icon: 'bi-person-check',
+      icon: Users,
       description: 'Currently in use',
-      color: 'text-warning',
-      bgColor: 'bg-warning',
+      color: 'text-yellow-600',
+      bgColor: 'bg-yellow-100',
     },
     {
       title: 'Pending Requests',
       value: stats.pendingRequests,
-      icon: 'bi-exclamation-triangle',
+      icon: AlertTriangle,
       description: 'Awaiting approval',
-      color: 'text-danger',
-      bgColor: 'bg-danger',
+      color: 'text-red-600',
+      bgColor: 'bg-red-100',
     },
   ];
 
   const getActivityIcon = (type) => {
     switch (type) {
       case 'allocation':
-        return <i className="bi bi-person-check text-primary"></i>;
+        return <Users className="h-4 w-4 text-primary" />;
       case 'request':
-        return <i className="bi bi-file-text text-warning"></i>;
+        return <FileText className="h-4 w-4 text-yellow-600" />;
       case 'asset':
-        return <i className="bi bi-box text-success"></i>;
+        return <Package className="h-4 w-4 text-green-600" />;
       case 'return':
-        return <i className="bi bi-arrow-return-left text-info"></i>;
+        return <TrendingUp className="h-4 w-4 text-gray-500" />;
       default:
-        return <i className="bi bi-clock text-muted"></i>;
+        return <Clock className="h-4 w-4 text-gray-500" />;
     }
   };
 
   return (
-    <div className="p-4">
+    <div className="p-6 space-y-6">
       {/* Greeting Banner */}
-      <div className="bg-primary text-white rounded p-4 mb-4">
-        <h1 className="h3 mb-2">
-          {getGreeting()}, {user?.name || 'User'}!
+      <div className="bg-gradient-to-r from-blue-600 to-blue-800 rounded-lg p-6 text-white shadow">
+        <h1 className="text-3xl font-bold mb-2">
+          {getGreeting()}, {user?.name || 'Demo Admin'}!
         </h1>
-        <p className="mb-0 opacity-75">
+        <p className="text-white/80">
           Here's what's happening with your asset inventory today.
         </p>
       </div>
 
       {/* Stat Cards */}
-      <div className="row mb-4">
-        {statCards.map((stat, index) => (
-          <div key={index} className="col-md-6 col-lg-3 mb-3">
-            <div className="card h-100">
-              <div className="card-body">
-                <div className="d-flex justify-content-between align-items-start">
-                  <div>
-                    <h6 className="card-title text-muted">{stat.title}</h6>
-                    <h2 className="mb-1">{stat.value}</h2>
-                    <small className="text-muted">{stat.description}</small>
-                  </div>
-                  <div className={`${stat.bgColor} text-white rounded p-2`}>
-                    <i className={`bi ${stat.icon}`}></i>
-                  </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {statCards.map((stat, index) => {
+          const Icon = stat.icon;
+          return (
+            <Card key={index}>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">
+                  {stat.title}
+                </CardTitle>
+                <div className={`p-2 rounded ${stat.bgColor}`}>
+                  <Icon className={`h-4 w-4 ${stat.color}`} />
                 </div>
-              </div>
-            </div>
-          </div>
-        ))}
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stat.value}</div>
+                <p className="text-xs text-muted-foreground">{stat.description}</p>
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
 
       {/* Activity + Quick Actions */}
-      <div className="row">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Activity */}
-        <div className="col-lg-8 mb-4">
-          <div className="card">
-            <div className="card-header">
-              <h5 className="mb-0">
-                <i className="bi bi-clock me-2"></i>
-                Recent Activity
-              </h5>
-              <small className="text-muted">Latest updates and changes in your inventory</small>
-            </div>
-            <div className="card-body">
-              <div className="list-group list-group-flush">
-                {stats.recentActivity.map((activity) => (
-                  <div key={activity.id} className="list-group-item d-flex align-items-center">
-                    <div className="me-3">
-                      {getActivityIcon(activity.type)}
-                    </div>
-                    <div className="flex-grow-1">
-                      <p className="mb-1 fw-medium">{activity.description}</p>
-                      <small className="text-muted">{activity.time}</small>
-                    </div>
+        <Card className="lg:col-span-2">
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              <Clock className="h-5 w-5" />
+              <span>Recent Activity</span>
+            </CardTitle>
+            <CardDescription>Latest updates and changes in your inventory</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {stats.recentActivity.map((activity) => (
+                <div key={activity.id} className="flex items-center space-x-3 p-3 rounded bg-muted">
+                  {getActivityIcon(activity.type)}
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">{activity.description}</p>
+                    <p className="text-xs text-muted-foreground">{activity.time}</p>
                   </div>
-                ))}
-              </div>
+                </div>
+              ))}
             </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
 
         {/* Quick Actions */}
-        <div className="col-lg-4 mb-4">
-          <div className="card">
-            <div className="card-header">
-              <h5 className="mb-0">Quick Actions</h5>
-              <small className="text-muted">Common tasks and shortcuts</small>
-            </div>
-            <div className="card-body">
-              <div className="d-grid gap-2">
-                {(user?.role === 'Admin' || user?.role === 'Procurement') && (
-                  <>
-                    <button 
-                      className="btn btn-outline-primary text-start"
-                      onClick={() => navigate('/assets/add')}
-                    >
-                      <i className="bi bi-box me-2"></i>
-                      Add New Asset
-                    </button>
-                    <button 
-                      className="btn btn-outline-primary text-start"
-                      onClick={() => navigate('/allocation')}
-                    >
-                      <i className="bi bi-person-check me-2"></i>
-                      Allocate Asset
-                    </button>
-                  </>
-                )}
-                <button 
-                  className="btn btn-outline-primary text-start"
-                  onClick={() => navigate('/requests')}
+        <Card>
+          <CardHeader>
+            <CardTitle>Quick Actions</CardTitle>
+            <CardDescription>Common tasks and shortcuts</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {(user?.role === 'Admin' || user?.role === 'Procurement') && (
+              <>
+                <Button 
+                  className="w-full justify-start" 
+                  variant="outline" 
+                  onClick={() => navigate('/assets/add')}
                 >
-                  <i className="bi bi-file-text me-2"></i>
-                  {user?.role === 'Employee' ? 'Submit New Request' : 'View All Requests'}
-                </button>
-                <button 
-                  className="btn btn-outline-primary text-start"
-                  onClick={() => navigate('/assets')}
+                  <Package className="h-4 w-4 mr-2" />
+                  Add New Asset
+                </Button>
+                <Button 
+                  className="w-full justify-start" 
+                  variant="outline" 
+                  onClick={() => navigate('/allocations')}
                 >
-                  <i className="bi bi-graph-up me-2"></i>
-                  View Asset Reports
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+                  <Users className="h-4 w-4 mr-2" />
+                  Allocate Asset
+                </Button>
+              </>
+            )}
+            <Button 
+              className="w-full justify-start" 
+              variant="outline" 
+              onClick={() => navigate('/requests')}
+            >
+              <FileText className="h-4 w-4 mr-2" />
+              {user?.role === 'Employee' ? 'Submit New Request' : 'View All Requests'}
+            </Button>
+            <Button 
+              className="w-full justify-start" 
+              variant="outline" 
+              onClick={() => navigate('/assets')}
+            >
+              <TrendingUp className="h-4 w-4 mr-2" />
+              View Asset Reports
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

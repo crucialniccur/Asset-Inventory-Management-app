@@ -1,3 +1,3 @@
-import { useToast, toast } from "@/hooks/use-toast";
+import { useToast, toast } from "../hooks/use-toast";
 export { useToast, toast };
 //# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJ1c2VUb2FzdCIsInRvYXN0Il0sInNvdXJjZXMiOlsiLi4vLi4vLi4vc3JjL2NvbXBvbmVudHMvdWkvdXNlLXRvYXN0LnRzIl0sInNvdXJjZXNDb250ZW50IjpbImltcG9ydCB7IHVzZVRvYXN0LCB0b2FzdCB9IGZyb20gXCJAL2hvb2tzL3VzZS10b2FzdFwiO1xuXG5leHBvcnQgeyB1c2VUb2FzdCwgdG9hc3QgfTtcbiJdLCJtYXBwaW5ncyI6IkFBQUEsU0FBU0EsUUFBUSxFQUFFQyxLQUFLLFFBQVEsbUJBQW1CO0FBRW5ELFNBQVNELFFBQVEsRUFBRUMsS0FBSyIsImlnbm9yZUxpc3QiOltdfQ==

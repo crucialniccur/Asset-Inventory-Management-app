@@ -2,7 +2,7 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
 import * as React from "react";
 import * as CheckboxPrimitive from "@radix-ui/react-checkbox";
 import { Check } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "../../lib/utils";
 const Checkbox = /*#__PURE__*/React.forwardRef(({
   className,
   ...props

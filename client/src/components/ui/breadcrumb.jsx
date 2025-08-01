@@ -2,7 +2,7 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
 import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { ChevronRight, MoreHorizontal } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "../../lib/utils";
 const Breadcrumb = /*#__PURE__*/React.forwardRef(({
   ...props
 }, ref) => /*#__PURE__*/React.createElement("nav", _extends({

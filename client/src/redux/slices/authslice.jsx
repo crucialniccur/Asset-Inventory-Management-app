@@ -1,122 +1,317 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
 
-const BASE_URL = 'http://localhost:5000';
+// Base API URL - adjust this to your backend URL
+const API_BASE_URL = /* process.env.REACT_APP_API_URL ||  */'http://localhost:5000';
 
-
-axios.defaults.headers.post['Content-Type'] = 'application/json';
-
-
-const api = axios.create({
-  baseURL: BASE_URL,
-  timeout: 10000,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
-
-// 🔐 LOGIN
+// Async thunks
 export const loginUser = createAsyncThunk(
   'auth/loginUser',
-  async (credentials, { rejectWithValue }) => {
+  async ({ email, password }, { rejectWithValue }) => {
     try {
-      const res = await api.post('/auth/login', credentials);
-      const token = res.data.access_token;
-      
-      // Set the token in headers for subsequent requests
-      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      
-      // Fetch user data
-      const userRes = await api.get('/auth/me');
-      
-      return {
-        user: userRes.data,
-        token: token
-      };
-    } catch (err) {
-      return rejectWithValue(
-        err.response?.data?.error || err.message || 'Login failed'
-      );
+      const response = await fetch(`${API_BASE_URL}/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        return rejectWithValue(data.error || 'Login failed');
+      }
+
+      return data;
+    } catch (error) {
+      return rejectWithValue(error.message || 'Network error occurred');
     }
   }
 );
 
-// 📝 REGISTER
+export const verify2FA = createAsyncThunk(
+  'auth/verify2FA',
+  async ({ user_id, code }, { rejectWithValue }) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/verify-2fa`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ user_id, code }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        return rejectWithValue(data.error || '2FA verification failed');
+      }
+
+      // Store token in localStorage
+      if (data.token) {
+        localStorage.setItem('authToken', data.token);
+      }
+
+      return data;
+    } catch (error) {
+      return rejectWithValue(error.message || 'Network error occurred');
+    }
+  }
+);
+
+export const getUserProfile = createAsyncThunk(
+  'auth/getUserProfile',
+  async (_, { rejectWithValue, getState }) => {
+    try {
+      const token = getState().auth.token || localStorage.getItem('authToken');
+      
+      if (!token) {
+        return rejectWithValue('No authentication token found');
+      }
+
+      const response = await fetch(`${API_BASE_URL}/auth/me`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        return rejectWithValue(data.error || 'Failed to fetch user profile');
+      }
+
+      return data;
+    } catch (error) {
+      return rejectWithValue(error.message || 'Network error occurred');
+    }
+  }
+);
+
 export const registerUser = createAsyncThunk(
   'auth/registerUser',
-  async (credentials, { rejectWithValue }) => {
+  async (userData, { rejectWithValue }) => {
     try {
-      const res = await api.post('/auth/register', credentials);
-      return {
-        user: res.data,
-        token: res.data.access_token || null
-      };
-    } catch (err) {
-      return rejectWithValue(
-        err.response?.data?.error || err.message || 'Registration failed'
-      );
+      const response = await fetch(`${API_BASE_URL}/auth/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userData),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        return rejectWithValue(data.error || 'Registration failed');
+      }
+
+      return data;
+    } catch (error) {
+      return rejectWithValue(error.message || 'Network error occurred');
     }
   }
 );
 
+export const requestPasswordReset = createAsyncThunk(
+  'auth/requestPasswordReset',
+  async ({ email }, { rejectWithValue }) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/request-reset`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        return rejectWithValue(data.error || 'Password reset request failed');
+      }
+
+      return data;
+    } catch (error) {
+      return rejectWithValue(error.message || 'Network error occurred');
+    }
+  }
+);
+
+export const resetPassword = createAsyncThunk(
+  'auth/resetPassword',
+  async ({ token, password }, { rejectWithValue }) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/reset-password`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ token, password }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        return rejectWithValue(data.error || 'Password reset failed');
+      }
+
+      return data;
+    } catch (error) {
+      return rejectWithValue(error.message || 'Network error occurred');
+    }
+  }
+);
+
+// Initial state
+const initialState = {
+  user: null,
+  token: localStorage.getItem('authToken') || null,
+  loading: false,
+  error: null,
+  requires2FA: false,
+  userId: null,
+  isAuthenticated: !!localStorage.getItem('authToken'),
+};
+
+// Auth slice
 const authSlice = createSlice({
   name: 'auth',
-  initialState: {
-    user: null,
-    token: localStorage.getItem('token') || null,
-    loading: false,
-    error: null,
-  },
+  initialState,
   reducers: {
-    logout(state) {
+    clearError: (state) => {
+      state.error = null;
+    },
+    reset2FA: (state) => {
+      state.requires2FA = false;
+      state.userId = null;
+    },
+    logout: (state) => {
       state.user = null;
       state.token = null;
-      localStorage.removeItem('token');
-      delete api.defaults.headers.common['Authorization']; 
+      state.loading = false;
+      state.error = null;
+      state.requires2FA = false;
+      state.userId = null;
+      state.isAuthenticated = false;
+      localStorage.removeItem('authToken');
     },
-    setCredentials(state, action) {
-      state.token = action.payload;
-      localStorage.setItem('token', action.payload);
-      api.defaults.headers.common['Authorization'] = `Bearer ${action.payload}`;
+    setAuthFromStorage: (state) => {
+      const token = localStorage.getItem('authToken');
+      if (token) {
+        state.token = token;
+        state.isAuthenticated = true;
+      }
     },
   },
   extraReducers: (builder) => {
     builder
-      // Login cases
+      // Login user
       .addCase(loginUser.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
       .addCase(loginUser.fulfilled, (state, action) => {
         state.loading = false;
-        state.user = action.payload.user;
-        state.token = action.payload.token;
-        localStorage.setItem('token', action.payload.token);
-        api.defaults.headers.common['Authorization'] = `Bearer ${action.payload.token}`;
+        state.error = null;
+        if (action.payload.requires2FA) {
+          state.requires2FA = true;
+          state.userId = action.payload.user_id;
+        }
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+        state.requires2FA = false;
+        state.userId = null;
       })
-
-      // Registration cases
+      
+      // Verify 2FA
+      .addCase(verify2FA.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(verify2FA.fulfilled, (state, action) => {
+        state.loading = false;
+        state.error = null;
+        state.token = action.payload.token;
+        state.isAuthenticated = true;
+        state.requires2FA = false;
+        state.userId = null;
+      })
+      .addCase(verify2FA.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      
+      // Get user profile
+      .addCase(getUserProfile.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getUserProfile.fulfilled, (state, action) => {
+        state.loading = false;
+        state.error = null;
+        state.user = action.payload;
+        state.isAuthenticated = true;
+      })
+      .addCase(getUserProfile.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+        // If token is invalid, logout
+        if (action.payload === 'No authentication token found' || 
+            action.payload === 'Failed to fetch user profile') {
+          state.token = null;
+          state.isAuthenticated = false;
+          localStorage.removeItem('authToken');
+        }
+      })
+      
+      // Register user
       .addCase(registerUser.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(registerUser.fulfilled, (state, action) => {
+      .addCase(registerUser.fulfilled, (state) => {
         state.loading = false;
-        state.token = action.payload.token;
-        state.user = action.payload.user || null; // Some APIs return user on register
-        localStorage.setItem('token', action.payload.token);
-        api.defaults.headers.common['Authorization'] = `Bearer ${action.payload.token}`;
+        state.error = null;
       })
       .addCase(registerUser.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      
+      // Request password reset
+      .addCase(requestPasswordReset.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(requestPasswordReset.fulfilled, (state) => {
+        state.loading = false;
+        state.error = null;
+      })
+      .addCase(requestPasswordReset.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      
+      // Reset password
+      .addCase(resetPassword.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(resetPassword.fulfilled, (state) => {
+        state.loading = false;
+        state.error = null;
+      })
+      .addCase(resetPassword.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       });
   },
 });
 
-export const { logout, setCredentials } = authSlice.actions;
+export const { clearError, reset2FA, logout, setAuthFromStorage } = authSlice.actions;
 export default authSlice.reducer;

@@ -2,8 +2,8 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
 import * as React from "react";
 import { Command as CommandPrimitive } from "cmdk";
 import { Search } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { cn } from "../../lib/utils";
+import { Dialog, DialogContent } from "../components/ui/dialog";
 const Command = /*#__PURE__*/React.forwardRef(({
   className,
   ...props

@@ -2,7 +2,7 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
 import * as React from "react";
 import { OTPInput, OTPInputContext } from "input-otp";
 import { Dot } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "../../lib/utils";
 const InputOTP = /*#__PURE__*/React.forwardRef(({
   className,
   containerClassName,

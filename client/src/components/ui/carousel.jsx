@@ -2,8 +2,8 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
 import * as React from "react";
 import useEmblaCarousel from "embla-carousel-react";
 import { ArrowLeft, ArrowRight } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
+import { cn } from "../../lib/utils";
+import { Button } from "../components/ui/button";
 const CarouselContext = /*#__PURE__*/React.createContext(null);
 function useCarousel() {
   const context = React.useContext(CarouselContext);
