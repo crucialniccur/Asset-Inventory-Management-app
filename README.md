@@ -1,115 +1,102 @@
 # Asset Inventory Management App
 
-## Repository
+A comprehensive web application for managing company assets, tracking allocations, and handling asset requests with role-based access control.
 
-This is the official repository for the Asset Inventory Management App: [https://github.com/crucialniccur/Asset-Inventory-Management-app](https://github.com/crucialniccur/Asset-Inventory-Management-app)
+## Live Demo
 
----
+**Live Application:** https://manage-flow-ui-wg9a.vercel.app/
 
-## Backend Setup & Usage Guide
+## Technologies Used
 
-### Prerequisites
-- Python 3.8
-- PostgreSQL
-- pipenv
+### Frontend
+- React 19.1.0
+- Redux Toolkit for state management
+- React Router for navigation
+- Tailwind CSS for styling
+- Vite for build tooling
+- Axios for API communication
+- Formik & Yup for form handling and validation
 
-### 1. Clone the repository
-```sh
+### Backend
+- Flask 2.3.3 (Python web framework)
+- SQLAlchemy for ORM
+- PostgreSQL database
+- JWT for authentication
+- Flask-Migrate for database migrations
+- Cloudinary for file uploads
+- Gunicorn for production deployment
+
+## Features
+
+- User authentication and role-based access control
+- Asset management and tracking
+- Asset allocation and request system
+- Activity logging and audit trails
+- File upload and image management
+- Responsive design for mobile and desktop
+- Real-time notifications and status updates
+
+## Quick Start
+
+### Backend Setup
+
+1. Clone the repository
+```bash
 git clone https://github.com/crucialniccur/Asset-Inventory-Management-app.git
 cd Asset-Inventory-Management-app/backend
 ```
 
-### 2. Set up the Python environment
-```sh
+2. Install dependencies
+```bash
 pipenv install --dev
 ```
 
-### 3. Configure Environment Variables
-Create a `.env` file in the `backend/` directory (or set these in your environment):
-```
+3. Configure environment variables
+```bash
+# Create .env file with:
 DATABASE_URL=postgresql://<user>:<password>@localhost/asset_innit
-SECRET_KEY=super-secret-key
-JWT_SECRET_KEY=super-jwt-secret-key
+SECRET_KEY=your-secret-key
+JWT_SECRET_KEY=your-jwt-secret
 ```
-- Adjust `DATABASE_URL` as needed for your local setup.
-- These are also loaded in `app/config.py`.
 
-### 4. Database Setup
-- Ensure PostgreSQL is running.
-- Create the database (default: `asset_innit`).
-
-### 5. Run Migrations
-```sh
+4. Setup database and run migrations
+```bash
 pipenv run flask db upgrade
-```
-
-### 6. Seed the Database (for development/testing)
-```sh
 pipenv run python seed.py
 ```
-- This will create demo users:
-  - **Admin:**    admin@example.com / adminpass
-  - **Finance:**  finance@example.com / financepass
-  - **Employee:** employee@example.com / employeepass
 
-### 7. Start the Backend Server
-```sh
+5. Start the server
+```bash
 pipenv run python run.py
 ```
-- The server will run on `http://localhost:5000/` by default.
 
----
+### Frontend Setup
 
-## Authentication & API Usage
-
-### Auth Endpoints
-- **Login:** `POST /auth/login`
-- **Get User Info:** `GET /auth/me` (requires JWT)
-- **Ping:** `GET /auth/ping`
-
-### Example: Login as Admin
-```sh
-curl -i -X POST http://localhost:5000/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"email": "admin@example.com", "password": "adminpass"}'
+1. Navigate to client directory
+```bash
+cd ../client
 ```
 
-### Example: Get Current User Info
-After login, copy the `access_token` from the response:
-```sh
-curl -i http://localhost:5000/auth/me \
-  -H "Authorization: Bearer <ACCESS_TOKEN>"
+2. Install dependencies
+```bash
+npm install
 ```
 
-### Example: Ping Endpoint
-```sh
-curl -i http://localhost:5000/auth/ping
+3. Start development server
+```bash
+npm run dev
 ```
 
----
+## Demo Users
 
-## Project Structure
+- **Admin:** admin@example.com / adminpass
+- **Finance:** finance@example.com / financepass
+- **Employee:** employee@example.com / employeepass
 
-- `backend/app/models/`   - SQLAlchemy models
-- `backend/app/routes/`   - Flask blueprints (auth, etc.)
-- `backend/app/utils/`    - Utility functions and decorators
-- `backend/seed.py`       - Database seeding script
-- `backend/run.py`        - App entry point
-- `backend/app/config.py` - App configuration
+## Repository
 
----
-
-## Development Best Practices
-- Use the app factory pattern (`create_app()` in `app/__init__.py`).
-- Register all blueprints in the app factory.
-- Initialize all extensions (db, JWTManager, etc.) in the app factory.
-- Use environment variables for secrets and database URIs.
-- Commit frequently with clear messages.
-- Never commit secrets or `.env` files.
-
----
+**GitHub:** https://github.com/crucialniccur/Asset-Inventory-Management-app
 
 ## License
 
 MIT License
-# Project README update
