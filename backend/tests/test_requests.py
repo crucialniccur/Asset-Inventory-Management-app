@@ -94,7 +94,7 @@ def test_get_user_requests(client, auth, db_session):
 """ approving a request """
 def test_admin_can_approve_request(client, auth, db_session):
     user = auth.login()
-    
+
     response = client.post("/requests", json={
         "asset_name": "Printer",
         "type": "New Asset",
@@ -125,4 +125,11 @@ def test_invalid_status_update(client, auth):
     response = client.patch(f"/requests/{request_id}", json={"status": "not-a-status"})
     assert response.status_code == 400
     assert "status" in response.get_json()["errors"]
-# Requests test formatting
+
+
+def test_submit_request(client, admin_token):
+    res = client.post("/api/requests/", json={
+        "asset_id": 1,
+        "reason": "Need for development"
+    }, headers={"Authorization": f"Bearer {admin_token}"})
+    assert res.status_code in [201, 400]

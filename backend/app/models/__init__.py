@@ -1,16 +1,14 @@
-from flask_sqlalchemy import SQLAlchemy
-from ..extensions import db
+from app.extensions import db
 
-db = SQLAlchemy()
-
-# Import models after initializing db to avoid circular imports
-
+# Import all models to ensure they are registered with SQLAlchemy
+from .user import User
+from .asset import Asset
+from .category import Category
+from .request import Request
+from .allocation import Allocation
+from .budget import Budget
+from .activity_log import ActivityLog  # ✅ This line registers ActivityLog
 
 def init_app_models():
-
-    from .asset import Asset
-    from .category import Category
-    from .request import Request
-    from .allocation import Allocation
-    from .user import User
-    from .asset_image import AssetImage
+    # Optional: Initialization logic
+    pass
