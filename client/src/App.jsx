@@ -1,4 +1,3 @@
-// src/App.jsx
 import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
@@ -8,13 +7,14 @@ import Sidebar from './components/Sidebar';
 import AssetList from './components/AssetList';
 import AssetDetail from './components/AssetDetail';
 import AddAssetForm from './components/AddAssetForm';
+import LandingPage from './components/LandingPage';
 import AssetAllocation from './components/AssetAllocation';
 import RequestForm from './components/RequestForm';
 import RequestsTable from './components/RequestsTable';
 import UserManagement from './components/UserManagement';
-import AddUser from './components/AddUser';
 import Settings from './components/Settings';
 import Login from './components/Login';
+import Register from './components/Register';
 
 function PrivateRoute({ children, allowedRoles = [] }) {
   const { token, user } = useSelector((state) => state.auth);
@@ -49,9 +49,10 @@ function App() {
       <div className="App">
         <Routes>
           {/* Public routes */}
+          <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={token ? <Navigate to="/dashboard" /> : <Login />} />
+          <Route path="/register" element={token ? <Navigate to="/dashboard" /> : <Register />} /> 
 
-          
           {/* Protected routes */}
           <Route path="/dashboard" element={
             <PrivateRoute>
@@ -116,14 +117,6 @@ function App() {
             <PrivateRoute allowedRoles={['Admin']}>
               <AppLayout>
                 <UserManagement />
-              </AppLayout>
-            </PrivateRoute>
-          } />
-          
-          <Route path="/users/add" element={
-            <PrivateRoute allowedRoles={['Admin']}>
-              <AppLayout>
-                <AddUser />
               </AppLayout>
             </PrivateRoute>
           } />
