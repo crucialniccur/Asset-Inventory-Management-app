@@ -2,7 +2,6 @@
 import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
-import LoginPage from './pages/LoginPage';
 
 import Dashboard from './components/Dashboard';
 import Sidebar from './components/Sidebar';
@@ -50,7 +49,7 @@ function App() {
       <div className="App">
         <Routes>
           {/* Public routes */}
-          <Route path="/login" element={token ? <Navigate to="/dashboard" /> : <LoginPage />} />
+          <Route path="/login" element={token ? <Navigate to="/dashboard" /> : <Login />} />
 
           
           {/* Protected routes */}
