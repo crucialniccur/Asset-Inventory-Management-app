@@ -13,7 +13,7 @@ import { useTheme } from 'next-themes';
 const Settings = () => {
   const {
     user
-  } = useAuth();
+  } = useSelector((state) => state.auth);
   const {
     theme,
     setTheme

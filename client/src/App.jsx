@@ -18,15 +18,15 @@ import Register from './components/Register';
 
 function PrivateRoute({ children, allowedRoles = [] }) {
   const { token, user } = useSelector((state) => state.auth);
-  
+
   if (!token) {
     return <Navigate to="/login" />;
   }
-  
+
   if (allowedRoles.length > 0 && user && !allowedRoles.includes(user.role)) {
     return <Navigate to="/dashboard" />;
   }
-  
+
   return children;
 }
 
@@ -61,7 +61,7 @@ function App() {
               </AppLayout>
             </PrivateRoute>
           } />
-          
+
           {/* Asset management routes */}
           <Route path="/assets" element={
             <PrivateRoute>
@@ -70,7 +70,7 @@ function App() {
               </AppLayout>
             </PrivateRoute>
           } />
-          
+
           <Route path="/assets/:id" element={
             <PrivateRoute>
               <AppLayout>
@@ -78,7 +78,7 @@ function App() {
               </AppLayout>
             </PrivateRoute>
           } />
-          
+
           <Route path="/assets/add" element={
             <PrivateRoute allowedRoles={['Admin', 'Procurement']}>
               <AppLayout>
@@ -86,7 +86,7 @@ function App() {
               </AppLayout>
             </PrivateRoute>
           } />
-          
+
           <Route path="/allocation" element={
             <PrivateRoute allowedRoles={['Admin', 'Procurement']}>
               <AppLayout>
@@ -94,7 +94,7 @@ function App() {
               </AppLayout>
             </PrivateRoute>
           } />
-          
+
           {/* Request routes */}
           <Route path="/requests" element={
             <PrivateRoute>
@@ -103,7 +103,7 @@ function App() {
               </AppLayout>
             </PrivateRoute>
           } />
-          
+
           <Route path="/requests/new" element={
             <PrivateRoute allowedRoles={['Employee']}>
               <AppLayout>
@@ -111,7 +111,7 @@ function App() {
               </AppLayout>
             </PrivateRoute>
           } />
-          
+
           {/* Admin routes */}
           <Route path="/users" element={
             <PrivateRoute allowedRoles={['Admin']}>
@@ -128,7 +128,7 @@ function App() {
               </AppLayout>
             </PrivateRoute>
           } />
-          
+
           {/* Default redirect */}
           <Route path="/" element={<Navigate to={token ? "/dashboard" : "/login"} />} />
           <Route path="*" element={<Navigate to={token ? "/dashboard" : "/login"} />} />

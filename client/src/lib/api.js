@@ -37,3 +37,36 @@ export const getWithAuth = async (endpoint) => {
   });
   return res.json();
 };
+
+export const putWithAuth = async (endpoint, data) => {
+  const res = await fetch(`${API}${endpoint}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${localStorage.getItem("token")}`
+    },
+    body: JSON.stringify(data)
+  });
+  return res.json();
+};
+
+export const deleteWithAuth = async (endpoint) => {
+  const res = await fetch(`${API}${endpoint}`, {
+    method: "DELETE",
+    headers: {
+      "Authorization": `Bearer ${localStorage.getItem("token")}`
+    }
+  });
+  return res.json();
+};
+
+export const uploadFile = async (endpoint, formData) => {
+  const res = await fetch(`${API}${endpoint}`, {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${localStorage.getItem("token")}`
+    },
+    body: formData
+  });
+  return res.json();
+};

@@ -27,12 +27,12 @@ pipenv install --dev
 ### 3. Configure Environment Variables
 Create a `.env` file in the `backend/` directory (or set these in your environment):
 ```
-DATABASE_URL=postgresql://<user>:<password>@localhost/asset_innit
+DATABASE_URI=postgresql://<user>:<password>@localhost/asset_innit
 SECRET_KEY=super-secret-key
 JWT_SECRET_KEY=super-jwt-secret-key
 ```
-- Adjust `DATABASE_URL` as needed for your local setup.
-- These are also loaded in `app/config.py`.
+- Adjust `DATABASE_URI` as needed for your local setup.
+- These are also loaded in `backend/app/config.py`.
 
 ### 4. Database Setup
 - Ensure PostgreSQL is running.

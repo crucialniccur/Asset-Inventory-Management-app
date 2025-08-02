@@ -31,7 +31,7 @@ const Register = () => {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify(values),
-        credentials: 'include', // Added to match Login component
+        credentials: 'include',
       });
 
       if (!response.ok) {

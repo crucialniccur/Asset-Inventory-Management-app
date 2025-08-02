@@ -1,5 +1,5 @@
 import React from 'react';
-import { useSelector } from '../contexts/AuthContext';
+import { useSelector } from 'react-redux';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { Badge } from '../components/ui/badge';
 import { Users, Shield, CreditCard, User } from 'lucide-react';
@@ -7,7 +7,7 @@ const RoleSwitcher = () => {
   const {
     user,
     switchRole
-  } = useAuth();
+  } = useSelector((state) => state.auth);
   const roles = [{
     value: 'Admin',
     label: 'Admin',
@@ -52,4 +52,5 @@ const RoleSwitcher = () => {
     className: "h-4 w-4"
   }), role.label))))));
 };
+
 export default RoleSwitcher;

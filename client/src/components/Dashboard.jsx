@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../contexts/AuthContext';
+import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Package, Users, FileText, AlertTriangle, TrendingUp, Clock } from 'lucide-react';
 
 const Dashboard = () => {
-  const { user } = useAuth();
+  const { user } = useSelector((state) => state.auth);
   const navigate = useNavigate();
 
   const [stats, setStats] = useState({
@@ -23,26 +23,26 @@ const Dashboard = () => {
       try {
         const response = await fetch('http://localhost:5000/api/dashboard', {
           method: 'GET',
-          credentials: 'include',
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
           },
         });
-  
+
         if (!response.ok) {
           throw new Error(`Failed to fetch dashboard data: ${response.status}`);
         }
-  
+
         const data = await response.json();
         setStats(data);
       } catch (error) {
         console.error('Error fetching dashboard stats:', error);
       }
     };
-  
+
     fetchDashboardStats();
   }, []);
-  
+
 
   const getGreeting = () => {
     const hour = new Date().getHours();
@@ -171,17 +171,17 @@ const Dashboard = () => {
           <CardContent className="space-y-3">
             {(user?.role === 'Admin' || user?.role === 'Procurement') && (
               <>
-                <Button 
-                  className="w-full justify-start" 
-                  variant="outline" 
+                <Button
+                  className="w-full justify-start"
+                  variant="outline"
                   onClick={() => navigate('/assets/add')}
                 >
                   <Package className="h-4 w-4 mr-2" />
                   Add New Asset
                 </Button>
-                <Button 
-                  className="w-full justify-start" 
-                  variant="outline" 
+                <Button
+                  className="w-full justify-start"
+                  variant="outline"
                   onClick={() => navigate('/allocations')}
                 >
                   <Users className="h-4 w-4 mr-2" />
@@ -189,17 +189,17 @@ const Dashboard = () => {
                 </Button>
               </>
             )}
-            <Button 
-              className="w-full justify-start" 
-              variant="outline" 
+            <Button
+              className="w-full justify-start"
+              variant="outline"
               onClick={() => navigate('/requests')}
             >
               <FileText className="h-4 w-4 mr-2" />
               {user?.role === 'Employee' ? 'Submit New Request' : 'View All Requests'}
             </Button>
-            <Button 
-              className="w-full justify-start" 
-              variant="outline" 
+            <Button
+              className="w-full justify-start"
+              variant="outline"
               onClick={() => navigate('/assets')}
             >
               <TrendingUp className="h-4 w-4 mr-2" />

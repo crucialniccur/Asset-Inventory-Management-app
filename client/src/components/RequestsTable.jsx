@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../contexts/AuthContext';
+import { useSelector } from 'react-redux';
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
 import { Input } from '../components/ui/input';
@@ -11,7 +11,7 @@ import { useToast } from '../hooks/use-toast';
 const RequestsTable = () => {
   const {
     user
-  } = useAuth();
+  } = useSelector((state) => state.auth);
   const {
     toast
   } = useToast();
@@ -30,10 +30,10 @@ const RequestsTable = () => {
   const fetchRequests = async () => {
     setIsLoading(true);
     setError(null);
-    
+
     try {
       const token = localStorage.getItem('authToken') || user?.token;
-      
+
       const response = await fetch(`${API_BASE_URL}/requests`, {
         method: 'GET',
         headers: {
@@ -55,7 +55,7 @@ const RequestsTable = () => {
       }
 
       const data = await response.json();
-      
+
       // Validate response structure
       if (!Array.isArray(data.requests) && !Array.isArray(data)) {
         throw new Error('Invalid response format: Expected array of requests');
@@ -64,7 +64,7 @@ const RequestsTable = () => {
       const requestsArray = data.requests || data;
       setRequests(requestsArray);
       setFilteredRequests(requestsArray);
-      
+
     } catch (err) {
       console.error('Error fetching requests:', err);
       setError(err.message);
@@ -81,10 +81,10 @@ const RequestsTable = () => {
   // Update request status via API
   const handleStatusUpdate = async (requestId, newStatus) => {
     setIsLoading(true);
-    
+
     try {
       const token = localStorage.getItem('authToken') || user?.token;
-      
+
       const response = await fetch(`${API_BASE_URL}/requests/${requestId}/status`, {
         method: 'PATCH',
         headers: {
@@ -107,18 +107,18 @@ const RequestsTable = () => {
       }
 
       const updatedRequest = await response.json();
-      
+
       // Update local state
-      setRequests(prev => prev.map(req => 
+      setRequests(prev => prev.map(req =>
         req.id === requestId ? { ...req, status: newStatus } : req
       ));
-      
+
       toast({
         title: "Status updated",
         description: `Request has been ${newStatus}`,
         variant: "default"
       });
-      
+
     } catch (err) {
       console.error('Error updating request status:', err);
       toast({
@@ -142,7 +142,7 @@ const RequestsTable = () => {
 
     if (searchTerm) {
       const searchLower = searchTerm.toLowerCase();
-      filtered = filtered.filter(req => 
+      filtered = filtered.filter(req =>
         req.asset_name?.toLowerCase().includes(searchLower) ||
         req.user?.name?.toLowerCase().includes(searchLower) ||
         req.user?.email?.toLowerCase().includes(searchLower) ||
@@ -214,7 +214,7 @@ const RequestsTable = () => {
 
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
-    
+
     try {
       return new Date(dateString).toLocaleDateString('en-US', {
         year: 'numeric',

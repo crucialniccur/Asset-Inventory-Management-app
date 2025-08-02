@@ -1,6 +1,7 @@
 import React from 'react';
-import { useAuth } from '../contexts/AuthContext';
+import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { logout } from '../redux/slices/authslice';
 import { cn } from '../lib/utils';
 import { Button } from '../components/ui/button';
 import {
@@ -10,7 +11,8 @@ import {
 
 
 const Sidebar = () => {
-  const { user, logout } = useAuth();
+  const { user, token } = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -32,6 +34,11 @@ const Sidebar = () => {
       return location.pathname === '/' || location.pathname === '/dashboard';
     }
     return location.pathname.startsWith(path);
+  };
+
+  const handleLogout = () => {
+    dispatch(logout());
+    navigate('/login');
   };
 
   return (
@@ -62,15 +69,15 @@ const Sidebar = () => {
       <nav className="flex-1 p-4 space-y-2">
         {filteredMenuItems.map(item => {
           const Icon = item.icon;
-          const isActive = activeTab === item.id;
+          const active = isActive(item.path);
           return (
             <Button
               key={item.id}
               variant="ghost"
-              onClick={() => setActiveTab(item.id)}
+              onClick={() => navigate(item.path)}
               className={cn(
                 "w-full justify-start space-x-3 h-10 rounded-md transition text-white",
-                isActive
+                active
                   ? "bg-[#111827] border border-[#2563eb]"
                   : "hover:bg-[#111827] hover:text-white"
               )}
@@ -86,7 +93,7 @@ const Sidebar = () => {
       <div className="p-4 border-t border-[#374151] space-y-2">
         <Button
           variant="ghost"
-          onClick={() => setActiveTab('settings')}
+          onClick={() => navigate('/settings')}
           className="w-full justify-start space-x-3 h-10 text-white hover:bg-[#111827]"
         >
           <Settings className="h-4 w-4" />
@@ -94,7 +101,7 @@ const Sidebar = () => {
         </Button>
         <Button
           variant="ghost"
-          onClick={logout}
+          onClick={handleLogout}
           className="w-full justify-start space-x-3 h-10 text-white hover:bg-red-600 hover:text-white"
         >
           <LogOut className="h-4 w-4" />

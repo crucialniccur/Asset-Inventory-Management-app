@@ -18,7 +18,7 @@ const Login = () => {
   const [error, setError] = useState('');
   const [requires2FA, setRequires2FA] = useState(false); // Add local state
   const [userId, setUserId] = useState(null); // Add local state
-  
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { loading, error: authError, token } = useSelector((state) => state.auth);
@@ -46,20 +46,19 @@ const Login = () => {
 
   const fetchLogin = async (email, password) => {
     try {
-      const response = await fetch("http://localhost:5000/auth/login", {
+      const response = await fetch("http://localhost:5000/api/auth/login", {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ email, password }),
-        credentials: 'include',
       });
-  
+
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || 'Login failed');
       }
-  
+
       const data = await response.json();
       console.log('Login successful:', data);
       return data;
@@ -73,7 +72,7 @@ const Login = () => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
-  
+
     try {
       const result = await fetchLogin(email, password);
       console.log(result);
@@ -89,7 +88,7 @@ const Login = () => {
     } finally {
       setIsLoading(false);
     }
-  };  
+  };
 
   const handle2FAVerification = async (e) => {
     e.preventDefault();
@@ -100,7 +99,7 @@ const Login = () => {
     try {
       const result = await dispatch(verify2FA({ user_id: userId, code })).unwrap();
       console.log('2FA verification result:', result);
-      
+
       // Fetch user profile after successful verification
       try {
         await dispatch(getUserProfile()).unwrap();
@@ -108,7 +107,7 @@ const Login = () => {
         console.error('Failed to fetch user profile:', profileError);
         // Continue anyway as we have the token
       }
-      
+
       toast({
         title: "Login successful",
         description: "Welcome to Asset Management System"
@@ -229,14 +228,14 @@ const Login = () => {
           <h5 className="mt-3 mb-1">Welcome back</h5>
           <p className="text-muted small">Sign in to access your dashboard</p>
         </div>
-  
+
         {error && (
           <div className="alert alert-danger d-flex align-items-center" role="alert">
             <i className="bi bi-exclamation-circle me-2"></i>
             <div>{error}</div>
           </div>
         )}
-  
+
         <form onSubmit={handleLogin}>
           <div className="mb-3">
             <label htmlFor="email" className="form-label">Email</label>
@@ -254,7 +253,7 @@ const Login = () => {
               />
             </div>
           </div>
-  
+
           <div className="mb-4">
             <label htmlFor="password" className="form-label">Password</label>
             <div className="input-group">
@@ -271,7 +270,7 @@ const Login = () => {
               />
             </div>
           </div>
-  
+
           <button
             type="submit"
             className="btn btn-primary w-100"
@@ -283,7 +282,7 @@ const Login = () => {
       </div>
     </div>
   </div>
-  
+
   );
 };
 
