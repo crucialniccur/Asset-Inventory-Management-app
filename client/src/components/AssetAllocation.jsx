@@ -96,7 +96,7 @@ const apiService = {
 };
 
 const AssetAllocation = () => {
-  const { user } = useSelector((state) => state.auth);
+  const { user } = useAuth();
   const { toast } = useToast();
   
   // State management
