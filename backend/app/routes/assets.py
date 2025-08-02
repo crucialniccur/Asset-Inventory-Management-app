@@ -58,39 +58,48 @@ def get_asset(asset_id):
 
 
 # ✅ Create asset (Admin & Procurement only)
-@assets_bp.route("/", methods=["POST"])
+from flask import request, jsonify
+from app.models.asset import Asset
+from app.extensions import db
+from flask_jwt_extended import jwt_required, get_jwt_identity
+
+@assets_bp.route('/assets', methods=['POST'])
 @jwt_required()
-@role_required("Admin", "Procurement")
 def create_asset():
-    data = request.form.to_dict()
-    file = request.files.get("image")
+    data = request.get_json()
 
-    required_fields = ("name", "category_id")
-    if not all(field in data for field in required_fields):
-        return jsonify({"error": "Missing required fields"}), 400
+    required_fields = ['name', 'category_id', 'image_url']
+    for field in required_fields:
+        if field not in data:
+            return jsonify({"error": f"Missing required field: {field}"}), 400
 
-    try:
-        image_url = upload_image(file) if file else None
+    user_id = get_jwt_identity()
 
-        new_asset = Asset(
-            name=data["name"],
-            description=data.get("description"),
-            image_url=image_url,
-            brand=data.get("brand"),
-            model_number=data.get("model_number"),
-            serial_number=data.get("serial_number"),
-            condition=data.get("condition"),
-            category_id=int(data["category_id"]),
-            created_by=get_jwt_identity()
-        )
+    asset = Asset(
+        name=data['name'],
+        description=data.get('description'),
+        image_url=data['image_url'],
+        brand=data.get('brand'),
+        model_number=data.get('model_number'),
+        serial_number=data.get('serial_number'),
+        condition=data.get('condition'),
+        status=data.get('status', 'available'),
+        category_id=data['category_id'],
+        created_by=user_id
+    )
 
-        db.session.add(new_asset)
-        db.session.commit()
-        return jsonify({"message": "Asset created successfully"}), 201
+    db.session.add(asset)
+    db.session.commit()
 
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({"error": str(e)}), 500
+    return jsonify({
+        "message": "Asset created successfully",
+        "asset": {
+            "id": asset.id,
+            "name": asset.name,
+            "image_url": asset.image_url,
+            "created_at": asset.created_at.isoformat()
+        }
+    }), 201
 
 
 # ✅ Update asset (Admin & Procurement)

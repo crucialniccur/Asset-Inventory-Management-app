@@ -43,21 +43,56 @@ const AddAssetForm = () => {
       location: ''
     }
   });
-  const onSubmit = data => {
-    console.log('Asset data:', data);
-    console.log('Uploaded files:', uploadedFiles);
+  const handleFileUpload = (files) => {
+  setUploadedFiles(files);
+  };
+  const onSubmit = async (data) => {
+  if (uploadedFiles.length === 0) {
     toast({
-      title: "Asset added successfully",
-      description: `${data.name} has been added to the inventory.`
+      title: "Image required",
+      description: "Please upload at least one image",
+      variant: "destructive"
+    });
+    return;
+  }
+
+  const assetData = {
+    ...data,
+    image_url: uploadedFiles[0].url || uploadedFiles[0]
+  };
+
+  try {
+    const res = await fetch('/api/assets', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${yourJwtToken}`
+      },
+      body: JSON.stringify(assetData)
     });
 
-    // Reset form
+    if (!res.ok) {
+      const error = await res.json();
+      throw new Error(error.error || "Asset creation failed");
+    }
+
+    const response = await res.json();
+    toast({
+      title: "Success",
+      description: `${response.asset.name} added successfully!`
+    });
+
     form.reset();
     setUploadedFiles([]);
-  };
-  const handleFileUpload = (url, publicId) => {
-    setUploadedFiles(prev => [...prev, url]);
-  };
+  } catch (err) {
+    toast({
+      title: "Error",
+      description: err.message,
+      variant: "destructive"
+    });
+  }
+};
+
   return /*#__PURE__*/React.createElement("div", {
     className: "space-y-6"
   }, /*#__PURE__*/React.createElement("div", {
