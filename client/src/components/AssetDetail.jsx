@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../contexts/AuthContext';
+import { useSelector } from 'react-redux';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
@@ -14,7 +14,7 @@ const AssetDetail = ({
 }) => {
   const {
     user
-  } = useAuth();
+  } = useSelector((state) => state.auth);
   const {
     toast
   } = useToast();

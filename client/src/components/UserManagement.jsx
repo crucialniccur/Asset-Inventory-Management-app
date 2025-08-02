@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../contexts/AuthContext';
+import { useSelector } from 'react-redux';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -14,7 +14,7 @@ import { Users, Plus, Edit, Trash2, Search, Filter, Shield, CreditCard, User, Re
 import { useToast } from '../hooks/use-toast';
 
 const UserManagement = () => {
-  const { user } = useAuth();
+  const { user } = useSelector((state) => state.auth);
   const { toast } = useToast();
   const [users, setUsers] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -45,10 +45,10 @@ const UserManagement = () => {
   const fetchUsers = async () => {
     setIsLoading(true);
     setError(null);
-    
+
     try {
       const token = getAuthToken();
-      
+
       const response = await fetch(`${API_BASE_URL}/users`, {
         method: 'GET',
         headers: {
@@ -70,7 +70,7 @@ const UserManagement = () => {
       }
 
       const data = await response.json();
-      
+
       // Validate response structure
       if (!Array.isArray(data.users) && !Array.isArray(data)) {
         throw new Error('Invalid response format: Expected array of users');
@@ -78,7 +78,7 @@ const UserManagement = () => {
 
       const usersArray = data.users || data;
       setUsers(usersArray);
-      
+
     } catch (err) {
       console.error('Error fetching users:', err);
       setError(err.message);
@@ -115,10 +115,10 @@ const UserManagement = () => {
     }
 
     setIsAddingUser(true);
-    
+
     try {
       const token = getAuthToken();
-      
+
       const response = await fetch(`${API_BASE_URL}/users`, {
         method: 'POST',
         headers: {
@@ -149,10 +149,10 @@ const UserManagement = () => {
       }
 
       const createdUser = await response.json();
-      
+
       // Add to local state
       setUsers(prev => [...prev, createdUser.user || createdUser]);
-      
+
       // Reset form
       setNewUser({
         name: '',
@@ -160,15 +160,15 @@ const UserManagement = () => {
         role: 'Employee',
         department: ''
       });
-      
+
       setIsDialogOpen(false);
-      
+
       toast({
         title: "User Added",
         description: `${createdUser.name || newUser.name} has been added successfully.`,
         variant: "default"
       });
-      
+
     } catch (err) {
       console.error('Error adding user:', err);
       toast({
@@ -184,10 +184,10 @@ const UserManagement = () => {
   // Update user via API
   const handleUpdateUser = async (userId, updatedData) => {
     setIsEditingUser(true);
-    
+
     try {
       const token = getAuthToken();
-      
+
       const response = await fetch(`${API_BASE_URL}/users/${userId}`, {
         method: 'PATCH',
         headers: {
@@ -213,20 +213,20 @@ const UserManagement = () => {
       }
 
       const updatedUser = await response.json();
-      
+
       // Update local state
-      setUsers(prev => prev.map(u => 
+      setUsers(prev => prev.map(u =>
         u.id === userId ? { ...u, ...updatedUser.user || updatedUser } : u
       ));
-      
+
       setEditingUser(null);
-      
+
       toast({
         title: "User Updated",
         description: "User information has been updated successfully.",
         variant: "default"
       });
-      
+
     } catch (err) {
       console.error('Error updating user:', err);
       toast({
@@ -242,10 +242,10 @@ const UserManagement = () => {
   // Delete user via API
   const handleDeleteUser = async (userId) => {
     setIsDeletingUser(userId);
-    
+
     try {
       const token = getAuthToken();
-      
+
       const response = await fetch(`${API_BASE_URL}/users/${userId}`, {
         method: 'DELETE',
         headers: {
@@ -270,13 +270,13 @@ const UserManagement = () => {
 
       // Remove from local state
       setUsers(prev => prev.filter(u => u.id !== userId));
-      
+
       toast({
         title: "User Deleted",
         description: "User has been removed from the system.",
         variant: "default"
       });
-      
+
     } catch (err) {
       console.error('Error deleting user:', err);
       toast({
@@ -328,7 +328,7 @@ const UserManagement = () => {
     };
 
     const Icon = getRoleIcon(role);
-    
+
     return (
       <Badge className={colors[role] || colors.Employee}>
         <Icon className="h-3 w-3 mr-1" />
@@ -351,7 +351,7 @@ const UserManagement = () => {
 
   const formatDate = (dateString) => {
     if (!dateString) return 'Never';
-    
+
     try {
       return new Date(dateString).toLocaleDateString('en-US', {
         year: 'numeric',
@@ -427,13 +427,13 @@ const UserManagement = () => {
           <h1 className="text-3xl font-bold">User Management</h1>
           <p className="text-muted-foreground">Manage system users and their roles</p>
         </div>
-        
+
         <div className="flex gap-2">
           <Button onClick={fetchUsers} variant="outline" disabled={isLoading}>
             <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
             Refresh
           </Button>
-          
+
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button className="bg-gradient-primary hover:opacity-90">
@@ -607,7 +607,7 @@ const UserManagement = () => {
                           >
                             <Edit className="h-3 w-3" />
                           </Button>
-                          
+
                           <AlertDialog>
                             <AlertDialogTrigger asChild>
                               <Button

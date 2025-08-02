@@ -72,17 +72,16 @@ def create_asset():
     try:
         image_url = upload_image(file) if file else None
 
-        new_asset = Asset(
-            name=data["name"],
-            description=data.get("description"),
-            image_url=image_url,
-            brand=data.get("brand"),
-            model_number=data.get("model_number"),
-            serial_number=data.get("serial_number"),
-            condition=data.get("condition"),
-            category_id=int(data["category_id"]),
-            created_by=get_jwt_identity()
-        )
+        new_asset = Asset()
+        new_asset.name = data["name"]
+        new_asset.description = data.get("description")
+        new_asset.image_url = image_url
+        new_asset.brand = data.get("brand")
+        new_asset.model_number = data.get("model_number")
+        new_asset.serial_number = data.get("serial_number")
+        new_asset.condition = data.get("condition")
+        new_asset.category_id = int(data["category_id"])
+        new_asset.created_by = get_jwt_identity()
 
         db.session.add(new_asset)
         db.session.commit()

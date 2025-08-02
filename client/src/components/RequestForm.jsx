@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../contexts/AuthContext';
+import { useSelector } from 'react-redux';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -11,7 +11,7 @@ import { FileText, Package, Wrench, CheckCircle, AlertTriangle, RefreshCw, XCirc
 import { useToast } from '../hooks/use-toast';
 
 const RequestForm = ({ onSubmit }) => {
-  const { user } = useAuth();
+  const { user } = useSelector((state) => state.auth);
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoadingAssets, setIsLoadingAssets] = useState(false);
@@ -41,10 +41,10 @@ const RequestForm = ({ onSubmit }) => {
   const fetchAvailableAssets = async () => {
     setIsLoadingAssets(true);
     setAssetsError(null);
-    
+
     try {
       const token = getAuthToken();
-      
+
       const response = await fetch(`${API_BASE_URL}/assets/available`, {
         method: 'GET',
         headers: {
@@ -66,7 +66,7 @@ const RequestForm = ({ onSubmit }) => {
       }
 
       const data = await response.json();
-      
+
       // Validate response structure
       if (!Array.isArray(data.assets) && !Array.isArray(data)) {
         throw new Error('Invalid response format: Expected array of assets');
@@ -74,7 +74,7 @@ const RequestForm = ({ onSubmit }) => {
 
       const assetsArray = data.assets || data;
       setAvailableAssets(assetsArray);
-      
+
     } catch (err) {
       console.error('Error fetching assets:', err);
       setAssetsError(err.message);
@@ -127,7 +127,7 @@ const RequestForm = ({ onSubmit }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     // Validate form
     const validationErrors = validateForm();
     if (validationErrors.length > 0) {
@@ -153,7 +153,7 @@ const RequestForm = ({ onSubmit }) => {
 
     try {
       const token = getAuthToken();
-      
+
       // Prepare request payload
       const requestPayload = {
         type: formData.type,
@@ -205,7 +205,7 @@ const RequestForm = ({ onSubmit }) => {
       }
 
       const result = await response.json();
-      
+
       toast({
         title: "Request Submitted Successfully",
         description: `Your ${formData.type === 'new_asset' ? 'asset request' : 'repair request'} has been submitted and is pending review.`,
@@ -229,7 +229,7 @@ const RequestForm = ({ onSubmit }) => {
       if (onSubmit && typeof onSubmit === 'function') {
         onSubmit(result.request || result);
       }
-      
+
     } catch (error) {
       console.error('Request submission error:', error);
       toast({
@@ -245,7 +245,7 @@ const RequestForm = ({ onSubmit }) => {
   const handleFormChange = (field, value) => {
     setFormData(prev => {
       const newData = { ...prev, [field]: value };
-      
+
       // Reset dependent fields when type changes
       if (field === 'type') {
         if (value === 'new_asset') {
@@ -256,7 +256,7 @@ const RequestForm = ({ onSubmit }) => {
           newData.estimatedCost = '';
         }
       }
-      
+
       return newData;
     });
   };
@@ -360,8 +360,8 @@ const RequestForm = ({ onSubmit }) => {
               {formData.type === 'new_asset' && (
                 <div>
                   <Label htmlFor="category">Asset Category *</Label>
-                  <Select 
-                    value={formData.category} 
+                  <Select
+                    value={formData.category}
                     onValueChange={(value) => handleFormChange('category', value)}
                   >
                     <SelectTrigger>
@@ -385,14 +385,14 @@ const RequestForm = ({ onSubmit }) => {
                 <div>
                   <Label htmlFor="assetId">Asset to Repair *</Label>
                   <div className="flex gap-2">
-                    <Select 
-                      value={formData.assetId} 
+                    <Select
+                      value={formData.assetId}
                       onValueChange={(value) => handleFormChange('assetId', value)}
                       disabled={isLoadingAssets}
                     >
                       <SelectTrigger className="flex-1">
                         <SelectValue placeholder={
-                          isLoadingAssets ? "Loading assets..." : 
+                          isLoadingAssets ? "Loading assets..." :
                           assetsError ? "Error loading assets" :
                           availableAssets.length === 0 ? "No assets available" :
                           "Select asset to repair"
@@ -431,8 +431,8 @@ const RequestForm = ({ onSubmit }) => {
                   id="title"
                   value={formData.title}
                   onChange={(e) => handleFormChange('title', e.target.value)}
-                  placeholder={formData.type === 'new_asset' ? 
-                    "e.g., New laptop for development team" : 
+                  placeholder={formData.type === 'new_asset' ?
+                    "e.g., New laptop for development team" :
                     "e.g., Fix printer paper jam issue"
                   }
                   maxLength={100}
@@ -449,7 +449,7 @@ const RequestForm = ({ onSubmit }) => {
                   id="description"
                   value={formData.description}
                   onChange={(e) => handleFormChange('description', e.target.value)}
-                  placeholder={formData.type === 'new_asset' ? 
+                  placeholder={formData.type === 'new_asset' ?
                     "Describe the asset you need, specifications, intended use, etc." :
                     "Describe the problem with the asset, error messages, when it started, etc."
                   }

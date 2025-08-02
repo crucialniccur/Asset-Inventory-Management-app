@@ -24,13 +24,13 @@ def get_current_user():
     try:
         user_id = get_jwt_identity()
         print(f"🔍 Getting user profile for ID: {user_id}")
-        
+
         user = User.query.get(user_id)
-        
+
         if not user:
             print(f"❌ User not found with ID: {user_id}")
             return jsonify({"error": "User not found"}), 404
-            
+
         user_data = {
             "id": user.id,
             "name": user.name,
@@ -39,10 +39,10 @@ def get_current_user():
             "department": user.department,
             "created_at": user.created_at.isoformat() if user.created_at else None
         }
-        
+
         print(f"✅ User profile retrieved: {user.email}")
         return jsonify(user_data), 200
-        
+
     except Exception as e:
         print(f"❌ Get current user error: {str(e)}")
         print(traceback.format_exc())
@@ -54,7 +54,7 @@ def register():
     """Register a new user"""
     try:
         data = request.get_json()
-        
+
         # Validate required fields
         required_fields = ["name", "email", "password", "role"]
         if not data or not all(k in data for k in required_fields):
@@ -64,11 +64,12 @@ def register():
         if User.query.filter_by(email=data["email"]).first():
             return jsonify({"error": "Email already in use"}), 409
 
-        # Admin registration restriction
+        # Admin registration restriction (allow if no admins or if it's the first user)
         if data["role"].upper() == "ADMIN":
             existing_admins = User.query.filter_by(role=UserRole.ADMIN).count()
-            if existing_admins > 0:
-                return jsonify({"error": "Admin registration is restricted"}), 403
+            total_users = User.query.count()
+            if existing_admins > 0 and total_users > 1:
+                return jsonify({"error": "Admin registration is restricted. Please register as a different role or contact an existing admin."}), 403
 
         # Validate role
         try:
@@ -78,14 +79,13 @@ def register():
             return jsonify({"error": f"Invalid user role. Valid roles: {valid_roles}"}), 400
 
         # Create new user
-        new_user = User(
-            name=data["name"],
-            email=data["email"],
-            role=role,
-            department=data.get("department")
-        )
+        new_user = User()
+        new_user.name = data["name"]
+        new_user.email = data["email"]
+        new_user.role = role
+        new_user.department = data.get("department")
         new_user.set_password(data["password"])
-        
+
         db.session.add(new_user)
         db.session.commit()
 
@@ -104,7 +104,7 @@ def login():
     """Authenticate user and send 2FA code"""
     try:
         data = request.get_json()
-        
+
         # Validate required fields
         if not data or not all(k in data for k in ("email", "password")):
             return jsonify({"error": "Missing email or password"}), 400
@@ -128,32 +128,32 @@ def login():
         try:
             code = generate_2fa_code(user.id)
             print(f"🔐 Generated 2FA code for user {user.id}: {code}")
-            
+
             # Send email with 2FA code
             email_subject = "Your Asset Manager 2FA Code"
             email_body = f"""
             Hello {user.name},
-            
+
             Your verification code for Asset Manager is: {code}
-            
+
             This code will expire in 10 minutes.
-            
+
             If you didn't request this code, please ignore this email.
-            
+
             Best regards,
             Asset Manager Team
             """
-            
+
             send_email(user.email, email_subject, email_body)
             print(f"📧 2FA code sent to: {user.email}")
-            
+
         except Exception as email_error:
             print(f"❌ Failed to send 2FA email: {str(email_error)}")
             return jsonify({"error": "Failed to send verification code"}), 500
 
         return jsonify({
-            "message": "2FA code sent to email", 
-            "user_id": user.id, 
+            "message": "2FA code sent to email",
+            "user_id": user.id,
             "requires2FA": True
         }), 200
 
@@ -168,14 +168,14 @@ def verify_2fa():
     """Verify 2FA code and return JWT token"""
     try:
         data = request.get_json()
-        
+
         # Validate required fields
         if not data or not all(k in data for k in ("user_id", "code")):
             return jsonify({"error": "Missing user_id or code"}), 400
 
         user_id = data["user_id"]
         code = data["code"]
-        
+
         print(f"🔐 Verifying 2FA code for user {user_id}: {code}")
 
         # Validate 2FA code
@@ -195,7 +195,7 @@ def verify_2fa():
             identity=identity,
             expires_delta=datetime.timedelta(hours=24)  # Token expires in 24 hours
         )
-        
+
         print(f"✅ 2FA verification successful for user: {user.email}")
         return jsonify({"token": token}), 200
 
@@ -207,16 +207,16 @@ def verify_2fa():
 """ @auth_bp.route("/request-reset", methods=["POST"])
 @cross_origin()
 def request_reset():
-    
+
     try:
         data = request.get_json()
-        
+
         if not data or not data.get("email"):
             return jsonify({"error": "Email is required"}), 400
 
         email = data.get("email")
         user = User.query.filter_by(email=email).first()
-        
+
         if not user:
             print(f"❌ Password reset requested for non-existent user: {email}")
             # Don't reveal if user exists or not for security
@@ -228,14 +228,14 @@ def request_reset():
             "email": user.email,
             "exp": datetime.datetime.utcnow() + datetime.timedelta(minutes=15)
         }
-        
+
         secret_key = os.getenv("SECRET_KEY")
         if not secret_key:
             print("❌ SECRET_KEY not found in environment")
             return jsonify({"error": "Server configuration error"}), 500
-            
+
         token = pyjwt.encode(token_data, secret_key, algorithm="HS256")
-        
+
         # Construct reset link
         frontend_url = os.getenv("FRONTEND_URL", "http://localhost:3000")
         reset_link = f"{frontend_url}/reset-password?token={token}"

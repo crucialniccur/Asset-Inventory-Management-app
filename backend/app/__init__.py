@@ -8,12 +8,13 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
 
-    # Configure CORS
-    CORS(app, 
+            # Configure CORS
+    CORS(app,
          origins=["http://localhost:5173", "https://manage-flow-ui-wg9a.vercel.app"],
          allow_headers=["Content-Type", "Authorization"],
          methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-         supports_credentials=True)
+         supports_credentials=False,
+         expose_headers=["Content-Type", "Authorization"])
 
     # Initialize extensions
     db.init_app(app)

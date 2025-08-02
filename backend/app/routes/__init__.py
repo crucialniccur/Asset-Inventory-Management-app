@@ -8,6 +8,8 @@ from .requests import requests_bp
 from .allocations import allocations_bp
 from .finance import finance_bp
 from .activity_logs import activity_logs_bp  # ✅ Add this
+from .dashboard import dashboard_bp
+from .dev import dev_bp
 from .reset_password import reset_bp
 
 
@@ -28,5 +30,7 @@ def register_routes(app):
     app.register_blueprint(allocations_bp, url_prefix="/api/allocations")
     app.register_blueprint(finance_bp, url_prefix="/api/finance")
     app.register_blueprint(activity_logs_bp, url_prefix="/api")  # ✅ Register logs route
+    app.register_blueprint(dashboard_bp, url_prefix="/api")
+    app.register_blueprint(dev_bp, url_prefix="/api/dev")
     app.register_blueprint(reset_bp, url_prefix="/api/auth")
 

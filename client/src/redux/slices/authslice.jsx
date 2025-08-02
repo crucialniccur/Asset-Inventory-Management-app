@@ -8,7 +8,7 @@ export const loginUser = createAsyncThunk(
   'auth/loginUser',
   async ({ email, password }, { rejectWithValue }) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/login`, {
+      const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -33,7 +33,7 @@ export const verify2FA = createAsyncThunk(
   'auth/verify2FA',
   async ({ user_id, code }, { rejectWithValue }) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/verify-2fa`, {
+      const response = await fetch(`${API_BASE_URL}/api/auth/verify-2fa`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -64,12 +64,12 @@ export const getUserProfile = createAsyncThunk(
   async (_, { rejectWithValue, getState }) => {
     try {
       const token = getState().auth.token || localStorage.getItem('authToken');
-      
+
       if (!token) {
         return rejectWithValue('No authentication token found');
       }
 
-      const response = await fetch(`${API_BASE_URL}/auth/me`, {
+      const response = await fetch(`${API_BASE_URL}/api/auth/me`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -94,7 +94,7 @@ export const registerUser = createAsyncThunk(
   'auth/registerUser',
   async (userData, { rejectWithValue }) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/register`, {
+      const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -227,7 +227,7 @@ const authSlice = createSlice({
         state.requires2FA = false;
         state.userId = null;
       })
-      
+
       // Verify 2FA
       .addCase(verify2FA.pending, (state) => {
         state.loading = true;
@@ -245,7 +245,7 @@ const authSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-      
+
       // Get user profile
       .addCase(getUserProfile.pending, (state) => {
         state.loading = true;
@@ -261,14 +261,14 @@ const authSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
         // If token is invalid, logout
-        if (action.payload === 'No authentication token found' || 
+        if (action.payload === 'No authentication token found' ||
             action.payload === 'Failed to fetch user profile') {
           state.token = null;
           state.isAuthenticated = false;
           localStorage.removeItem('authToken');
         }
       })
-      
+
       // Register user
       .addCase(registerUser.pending, (state) => {
         state.loading = true;
@@ -282,7 +282,7 @@ const authSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-      
+
       // Request password reset
       .addCase(requestPasswordReset.pending, (state) => {
         state.loading = true;
@@ -296,7 +296,7 @@ const authSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-      
+
       // Reset password
       .addCase(resetPassword.pending, (state) => {
         state.loading = true;

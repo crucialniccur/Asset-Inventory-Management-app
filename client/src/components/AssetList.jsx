@@ -6,10 +6,10 @@ import { Input } from '../components/ui/input';
 import { Badge } from '../components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { Package, Search, Filter, Plus, Edit, Trash2, Eye } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
+import { useSelector } from 'react-redux';
 
 const AssetList = () => {
-  const { user } = useAuth();
+  const { user } = useSelector((state) => state.auth);
   const navigate = useNavigate();
   const [assets, setAssets] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -21,16 +21,16 @@ const AssetList = () => {
       try {
         const response = await fetch('http://localhost:5000/api/assets', {
           method: 'GET',
-          credentials: 'include', 
+          credentials: 'include',
           headers: {
             'Content-Type': 'application/json',
           },
         });
-  
+
         if (!response.ok) {
           throw new Error(`HTTP ${response.status}`);
         }
-  
+
         const data = await response.json();
         setAssets(data);
       } catch (error) {
@@ -39,10 +39,10 @@ const AssetList = () => {
         setIsLoading(false);
       }
     };
-  
+
     fetchAssets();
   }, []);
-  
+
 
   const filteredAssets = assets.filter(asset => {
     const matchesSearch =

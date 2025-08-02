@@ -13,7 +13,7 @@ import { useToast } from '../hooks/use-toast';
 const AssetAllocation = () => {
   const {
     user
-  } = useAuth();
+  } = useSelector((state) => state.auth);
   const {
     toast
   } = useToast();
