@@ -30,11 +30,12 @@ const UserManagement = () => {
     name: '',
     email: '',
     role: 'Employee',
-    department: ''
+    department: '',
+    password: ''
   });
 
   // API configuration
-  const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
+  const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
   // Get auth token
   const getAuthToken = () => {
@@ -49,7 +50,7 @@ const UserManagement = () => {
     try {
       const token = getAuthToken();
 
-      const response = await fetch(`${API_BASE_URL}/users`, {
+      const response = await fetch(`${API_BASE_URL}/users/`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -94,7 +95,7 @@ const UserManagement = () => {
 
   // Add new user via API
   const handleAddUser = async () => {
-    if (!newUser.name || !newUser.email || !newUser.department) {
+    if (!newUser.name || !newUser.email || !newUser.department || !newUser.password) {
       toast({
         title: "Error",
         description: "Please fill in all required fields.",
@@ -119,7 +120,7 @@ const UserManagement = () => {
     try {
       const token = getAuthToken();
 
-      const response = await fetch(`${API_BASE_URL}/users`, {
+      const response = await fetch(`${API_BASE_URL}/users/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -129,7 +130,8 @@ const UserManagement = () => {
           name: newUser.name.trim(),
           email: newUser.email.trim().toLowerCase(),
           role: newUser.role,
-          department: newUser.department.trim()
+          department: newUser.department.trim(),
+          password: newUser.password
         }),
       });
 
@@ -158,7 +160,8 @@ const UserManagement = () => {
         name: '',
         email: '',
         role: 'Employee',
-        department: ''
+        department: '',
+        password: ''
       });
 
       setIsDialogOpen(false);
@@ -188,7 +191,7 @@ const UserManagement = () => {
     try {
       const token = getAuthToken();
 
-      const response = await fetch(`${API_BASE_URL}/users/${userId}`, {
+      const response = await fetch(`${API_BASE_URL}/users/${userId}/`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -246,7 +249,7 @@ const UserManagement = () => {
     try {
       const token = getAuthToken();
 
-      const response = await fetch(`${API_BASE_URL}/users/${userId}`, {
+      const response = await fetch(`${API_BASE_URL}/users/${userId}/`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -495,6 +498,17 @@ const UserManagement = () => {
                     value={newUser.department}
                     onChange={(e) => setNewUser({ ...newUser, department: e.target.value })}
                     placeholder="Enter department"
+                    disabled={isAddingUser}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="password">Password *</Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    value={newUser.password}
+                    onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
+                    placeholder="Enter password"
                     disabled={isAddingUser}
                   />
                 </div>

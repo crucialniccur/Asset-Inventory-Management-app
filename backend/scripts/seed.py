@@ -26,7 +26,7 @@ def seed_database():
         users_data = [
             {
                 "name": "Admin User",
-                "email": "admin@example.com",
+                "email": "crucialniccur@gmail.com",
                 "password": "adminpass",
                 "role": UserRole.ADMIN,
                 "department": "IT"

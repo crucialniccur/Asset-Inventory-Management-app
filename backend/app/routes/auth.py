@@ -62,7 +62,7 @@ def register():
 
         # Check if email already exists
         if User.query.filter_by(email=data["email"]).first():
-            return jsonify({"error": "Email already in use"}), 409
+            return jsonify({"error": "Email already in use. Please use a different email address."}), 409
 
         # Admin registration restriction (allow if no admins or if it's the first user)
         if data["role"].upper() == "ADMIN":
@@ -90,7 +90,16 @@ def register():
         db.session.commit()
 
         print(f"✅ User registered successfully: {new_user.email}")
-        return jsonify({"message": "User registered successfully"}), 201
+        return jsonify({
+            "message": "User registered successfully",
+            "user": {
+                "id": new_user.id,
+                "name": new_user.name,
+                "email": new_user.email,
+                "role": new_user.role.value,
+                "department": new_user.department
+            }
+        }), 201
 
     except Exception as e:
         db.session.rollback()
