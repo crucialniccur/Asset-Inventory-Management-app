@@ -10,7 +10,6 @@ import { Avatar, AvatarFallback } from '../components/ui/avatar';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '../components/ui/dialog';
 import { UserCheck, Package, Calendar, Search, Filter, Undo, AlertCircle, Loader2 } from 'lucide-react';
 import { useToast } from '../hooks/use-toast';
-import { useAuth } from '../hooks/use-auth';
 
 // API service functions
 const apiService = {
