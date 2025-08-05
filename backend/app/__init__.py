@@ -11,10 +11,11 @@ def create_app():
             # Configure CORS
     CORS(app,
          origins=["http://localhost:5173", "https://manage-flow-ui-wg9a.vercel.app"],
-         allow_headers=["Content-Type", "Authorization"],
+         allow_headers=["Content-Type", "Authorization", "Accept"],
          methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-         supports_credentials=False,
-         expose_headers=["Content-Type", "Authorization"])
+         supports_credentials=True,
+         expose_headers=["Content-Type", "Authorization"],
+         max_age=3600)
 
     # Initialize extensions
     db.init_app(app)

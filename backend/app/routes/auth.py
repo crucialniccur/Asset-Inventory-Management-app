@@ -17,7 +17,6 @@ import traceback
 auth_bp = Blueprint("auth", __name__)
 
 @auth_bp.route("/me", methods=["GET"])
-@cross_origin()
 @jwt_required()
 def get_current_user():
     """Get current authenticated user profile"""
@@ -49,7 +48,6 @@ def get_current_user():
         return jsonify({"error": "Internal server error"}), 500
 
 @auth_bp.route("/register", methods=["POST"])
-@cross_origin()
 def register():
     """Register a new user"""
     try:
@@ -108,7 +106,6 @@ def register():
         return jsonify({"error": "Internal server error"}), 500
 
 @auth_bp.route("/login", methods=["POST"])
-@cross_origin()
 def login():
     """Authenticate user and send 2FA code"""
     try:
@@ -172,7 +169,6 @@ def login():
         return jsonify({"error": "Internal server error"}), 500
 
 @auth_bp.route("/verify-2fa", methods=["POST"])
-@cross_origin()
 def verify_2fa():
     """Verify 2FA code and return JWT token"""
     try:
@@ -214,7 +210,6 @@ def verify_2fa():
         return jsonify({"error": "Internal server error"}), 500
 
 """ @auth_bp.route("/request-reset", methods=["POST"])
-@cross_origin()
 def request_reset():
 
     try:

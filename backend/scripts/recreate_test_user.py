@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Create a new user account for testing
+Delete and recreate the test user account with proper password hashing
 """
 
 import sys
@@ -11,20 +11,22 @@ from app import create_app
 from app.extensions import db
 from app.models.user import User, UserRole
 
-def create_test_user():
-    """Create a test user account"""
+def recreate_test_user():
+    """Delete and recreate the test user account"""
     app = create_app()
 
     with app.app_context():
-        print(" Creating test user account...")
+        print(" 🔄 Recreating test user account...")
 
-        # Check if user already exists
+        # Delete existing user if it exists
         existing_user = User.query.filter_by(email="test@example.com").first()
         if existing_user:
-            print(" User test@example.com already exists!")
-            return
+            print(" 🗑️  Deleting existing test user...")
+            db.session.delete(existing_user)
+            db.session.commit()
+            print(" ✅ Existing user deleted!")
 
-        # Create new user
+        # Create new user with proper password hashing
         user = User()
         user.name = "Test User"
         user.email = "test@example.com"
@@ -45,4 +47,4 @@ def create_test_user():
             print(f" ❌ Error creating user: {str(e)}")
 
 if __name__ == "__main__":
-    create_test_user()
+    recreate_test_user()
