@@ -9,16 +9,16 @@ export default function LandingPage() {
   return (
       <div
           style={{
-            backgroundImage: `linear-gradient(to right, rgba(0, 102, 204, 0.7), rgba(0, 102, 204, 0.7)), url(${bgImage})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            backgroundRepeat: 'no-repeat',
-            minHeight: '100vh',
-            width: '100vw',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}
+          backgroundImage: `linear-gradient(to right, rgba(0, 102, 204, 0.7), rgba(0, 102, 204, 0.7)), url(${bgImage})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+          minHeight: '100vh',
+          width: '100vw',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
       >
         <div className="text-center text-white px-4 max-w-3xl py-16 w-full">
           <div className="flex justify-center items-center gap-2 mb-4">
