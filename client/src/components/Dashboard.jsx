@@ -22,7 +22,7 @@ const Dashboard = () => {
     const fetchDashboardStats = async () => {
       try {
         const token = localStorage.getItem('token');
-        const response = await fetch('http://localhost:5000/api/dashboard', {
+        const response = await fetch('https://asset-inventory-management-app.onrender.com/api/dashboard', {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'

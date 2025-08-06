@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
-const BASE_URL = 'http://localhost:5000';
+const BASE_URL = 'https://asset-inventory-management-app.onrender.com';
 
 const api = axios.create({
   baseURL: BASE_URL,
@@ -142,7 +142,7 @@ const requestsSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-      
+
       // Fetch single request
       .addCase(fetchRequest.pending, (state) => {
         state.loading = true;
@@ -156,7 +156,7 @@ const requestsSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-      
+
       // Create request
       .addCase(createRequest.pending, (state) => {
         state.loading = true;
@@ -170,7 +170,7 @@ const requestsSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-      
+
       // Update request
       .addCase(updateRequest.pending, (state) => {
         state.loading = true;
@@ -190,7 +190,7 @@ const requestsSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-      
+
       // Approve request
       .addCase(approveRequest.pending, (state) => {
         state.loading = true;
@@ -210,7 +210,7 @@ const requestsSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-      
+
       // Reject request
       .addCase(rejectRequest.pending, (state) => {
         state.loading = true;
@@ -230,7 +230,7 @@ const requestsSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-      
+
       // Delete request
       .addCase(deleteRequest.pending, (state) => {
         state.loading = true;
@@ -251,4 +251,4 @@ const requestsSlice = createSlice({
 });
 
 export const { clearError, clearCurrentRequest } = requestsSlice.actions;
-export default requestsSlice.reducer; 
+export default requestsSlice.reducer;

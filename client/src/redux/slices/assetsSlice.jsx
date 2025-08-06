@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
-const BASE_URL = 'http://localhost:5000';
+const BASE_URL = 'https://asset-inventory-management-app.onrender.com';
 
 const api = axios.create({
   baseURL: BASE_URL,
@@ -130,7 +130,7 @@ const assetsSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-      
+
       // Fetch single asset
       .addCase(fetchAsset.pending, (state) => {
         state.loading = true;
@@ -144,7 +144,7 @@ const assetsSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-      
+
       // Create asset
       .addCase(createAsset.pending, (state) => {
         state.loading = true;
@@ -158,7 +158,7 @@ const assetsSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-      
+
       // Update asset
       .addCase(updateAsset.pending, (state) => {
         state.loading = true;
@@ -178,7 +178,7 @@ const assetsSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-      
+
       // Delete asset
       .addCase(deleteAsset.pending, (state) => {
         state.loading = true;
@@ -195,7 +195,7 @@ const assetsSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-      
+
       // Fetch categories
       .addCase(fetchCategories.pending, (state) => {
         state.loading = true;
@@ -213,4 +213,4 @@ const assetsSlice = createSlice({
 });
 
 export const { clearError, clearCurrentAsset } = assetsSlice.actions;
-export default assetsSlice.reducer; 
+export default assetsSlice.reducer;

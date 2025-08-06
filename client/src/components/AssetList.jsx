@@ -19,7 +19,7 @@ const AssetList = () => {
   useEffect(() => {
     const fetchAssets = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/assets', {
+        const response = await fetch('https://asset-inventory-management-app.onrender.com/api/assets', {
           method: 'GET',
           credentials: 'include',
           headers: {
