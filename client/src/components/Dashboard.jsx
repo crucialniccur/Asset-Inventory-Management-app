@@ -22,11 +22,7 @@ const Dashboard = () => {
     const fetchDashboardStats = async () => {
       try {
         const token = localStorage.getItem('token');
-<<<<<<< Updated upstream
         const response = await fetch('https://asset-inventory-management-app.onrender.com/api/dashboard', {
-=======
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/dashboard`, {
->>>>>>> Stashed changes
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
