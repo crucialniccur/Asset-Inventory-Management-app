@@ -34,7 +34,7 @@ const RequestsTable = () => {
     try {
       const token = localStorage.getItem('authToken') || user?.token;
 
-      const response = await fetch(`${API_BASE_URL}/requests`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/requests`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -85,7 +85,7 @@ const RequestsTable = () => {
     try {
       const token = localStorage.getItem('authToken') || user?.token;
 
-      const response = await fetch(`${API_BASE_URL}/requests/${requestId}/status`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/requests/${requestId}/status`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',

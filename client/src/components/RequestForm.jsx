@@ -45,7 +45,7 @@ const RequestForm = ({ onSubmit }) => {
     try {
       const token = getAuthToken();
 
-      const response = await fetch(`${API_BASE_URL}/assets/available`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/assets/available`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -177,7 +177,7 @@ const RequestForm = ({ onSubmit }) => {
         requestPayload.assetId = formData.assetId;
       }
 
-      const response = await fetch(`${API_BASE_URL}/requests`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/requests`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

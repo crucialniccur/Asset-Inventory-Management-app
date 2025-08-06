@@ -62,7 +62,7 @@ const AddAssetForm = () => {
   };
 
   try {
-    const res = await fetch('/api/assets', {
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/assets`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

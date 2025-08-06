@@ -24,7 +24,7 @@ const apiService = {
 
   // Fetch all allocations
   async getAllocations() {
-    const response = await fetch('/api/allocations', {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/allocations`, {
       headers: this.getAuthHeaders(),
     });
     
@@ -37,7 +37,7 @@ const apiService = {
 
   // Fetch available assets (status = 'available')
   async getAvailableAssets() {
-    const response = await fetch('/api/assets', {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/assets`, {
       headers: this.getAuthHeaders(),
     });
     
@@ -52,7 +52,7 @@ const apiService = {
 
   // Fetch all users (for employee selection)
   async getUsers() {
-    const response = await fetch('/api/users', {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/users`, {
       headers: this.getAuthHeaders(),
     });
     
@@ -65,7 +65,7 @@ const apiService = {
 
   // Create new allocation
   async createAllocation(allocationData) {
-    const response = await fetch('/api/allocations', {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/allocations`, {
       method: 'POST',
       headers: this.getAuthHeaders(),
       body: JSON.stringify(allocationData),
@@ -81,7 +81,7 @@ const apiService = {
 
   // Return asset (update allocation status)
   async returnAsset(allocationId) {
-    const response = await fetch(`/api/allocations/${allocationId}/return`, {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/allocations/${allocationId}/return`, {
       method: 'PATCH',
       headers: this.getAuthHeaders(),
     });

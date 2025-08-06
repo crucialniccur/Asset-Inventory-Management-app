@@ -50,7 +50,7 @@ const UserManagement = () => {
     try {
       const token = getAuthToken();
 
-      const response = await fetch(`${API_BASE_URL}/users/`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/users/`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -120,7 +120,7 @@ const UserManagement = () => {
     try {
       const token = getAuthToken();
 
-      const response = await fetch(`${API_BASE_URL}/users/`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/users/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -191,7 +191,7 @@ const UserManagement = () => {
     try {
       const token = getAuthToken();
 
-      const response = await fetch(`${API_BASE_URL}/users/${userId}/`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/users/${userId}/`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -249,7 +249,7 @@ const UserManagement = () => {
     try {
       const token = getAuthToken();
 
-      const response = await fetch(`${API_BASE_URL}/users/${userId}/`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/users/${userId}/`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',

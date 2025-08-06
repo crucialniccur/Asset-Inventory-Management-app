@@ -19,7 +19,11 @@ const AssetList = () => {
   useEffect(() => {
     const fetchAssets = async () => {
       try {
+<<<<<<< Updated upstream
         const response = await fetch('https://asset-inventory-management-app.onrender.com/api/assets', {
+=======
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/assets`, {
+>>>>>>> Stashed changes
           method: 'GET',
           credentials: 'include',
           headers: {
