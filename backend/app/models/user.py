@@ -19,7 +19,7 @@ class User(db.Model):
     name = db.Column(db.String(120), nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(256), nullable=False)
-    role = db.Column(db.Enum(UserRole), nullable=False, default=UserRole.EMPLOYEE)
+    role = db.Column(db.Enum(UserRole,  name="userrole"), nullable=False, default=UserRole.EMPLOYEE)
     department = db.Column(db.String(100))
     is_active = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
